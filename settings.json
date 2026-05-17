@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(conda env list)",
+      "Bash(conda activate *)",
+      "Bash(mamba activate *)",
+      "Bash(source \"$(conda info --base)/etc/profile.d/conda.sh\"*)",
+      "Bash(parallel --version)",
+      "Bash(tmux -V)",
+      "Bash(cat ~/.claude/settings.json 2>/dev/null | head -30)",
+      "Read(//home/wma/.claude/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/home/wma/.claude"
+    ]
+  },
+  "model": "opus",
+  "enabledPlugins": {
+    "claude-md-management@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  },
+  "outputStyle": "default",
+  "effortLevel": "xhigh",
+  "theme": "auto",
+  "editorMode": "normal",
+  "verbose": true,
+  "autoCompactEnabled": true
+}
