@@ -1,7 +1,8 @@
 # CLAUDE.md — Global Preferences
+### Context
+Solo researcher; personal experimentation only. No enterprise/production complexity. All added complexity has a real cost.
 
-## Interpreting Instructions
-Treat hedged phrasing ("may", "should", "could", "if possible", "try to", "ideally", "maybe", "probably", "I think", "I guess", "favour") as real instructions, not suggestions. Apply throughout the whole task. Keep user corrections active for the rest of the task without re-asking.
+**Governing principle: code is not just for the machine — it is the primary interface between the user and their own work. Prefer the implementation the user can read, debug, and modify without friction over the one that is merely correct. If the user would need to re-read it to understand what it does, it is not simple enough.**
 
 ## Core Behavior
 - Only do what is asked; no unrequested changes or features.
@@ -20,7 +21,6 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 ## Shell Discipline
 - Prefer workspace-relative paths; use absolute only when a tool requires it.
 - Use bare binary names (ruff, pylint, etc.); rely on PATH or the active venv.
-- Print lint/test output directly; don't redirect to /tmp or out-of-workspace paths.
 
 ---
 
@@ -30,19 +30,21 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 Solo researcher; personal experimentation only. No enterprise/production complexity. All added complexity has a real cost.
 
 ### Design
+- When choosing between two approaches that both work, prefer the one the user can scan and modify confidently. Cleverness that saves lines but costs comprehension is a net loss.
 - Least complex solution that works; simple, explicit control flow over layered machinery.
 - No speculative guards, validation, or branching; add only for real invariants or actual failures.
 - Main path scannable top-to-bottom. Definitions near use. Inline single-use helpers; extract only genuinely reused or dense logic.
 - Prefer the clearest standard construct over clever convenience helpers or hand-rolled machinery when both do the same job. Use `==` over `.equals()` or `.eq()`, use for loops and comprehensions over `map` and `filter`, use slicing and built-ins like `zip`, `enumerate`, `sorted`, `reversed`, `any`, `all`, `sum`, `min`, `max`, `len`, etc. over custom helpers that do the same thing.
 - joblib.Parallel job wrapper functions must be ≤3 lines (name, call, return). If longer, restructure the called function instead.
 - For multi-axis iteration, prefer `itertools.product` over triple-nested list comprehensions.
+- Use `with` statements for all resource management (files, connections, locks). Never open without a context manager.
+- When there is one obvious, standard way to do something, use it. Don't reach for a custom solution when a built-in idiom exists.
+- Explicit over implicit: code should show what it does, not hide it behind abstraction, magic, or indirection.
 - When multiple callables share a dispatch pattern (name → fn + fixed kwargs), encode as a `dict[str, Callable]` using `functools.partial` to pre-bind kwargs — not as `(name, fn, kwargs)` tuples passed around.
-
-### Performance
-- Keep hot-path ops device-resident; avoid per-iteration GPU↔CPU syncs (`.item()`, `.cpu()`) unless required.
 
 ### Style
 - PEP 8 and PEP 257 unless the repo deviates.
+- Prefer the form that reads closest to plain English. If a fluent Python reader would pause, simplify.
 - Add type hints to all new public function signatures. Internal helpers (prefixed `_`) may omit hints if the types are obvious from context.
 - Docstrings: if the name and signature make the contract self-evident (PEP 257), a single summary line is the complete docstring — do not add more. When the contract isn't obvious, add Google-style Args/Returns/Raises; keep each field a phrase or short clause, not a prose paragraph.
 - Both docstrings and comments: minimize explanatory prose. Prefer structured information — Args/Returns/Raises fields, brief inline notes — over sentences and paragraphs. If it can be said in a phrase, don't write a sentence.
@@ -53,8 +55,6 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 Use VS Code interactive cells: `# %% [markdown]` + title, then `# %%` per runnable block. Section top-level flow only; don't create dozens of tiny cells.
 
 ### Python Environment
-- Activate the workspace's Python environment before any Python-adjacent tool; invoke bare commands (`python`, `ruff`, `pylint`, `pytest`). No `conda run`, `poetry run`, or `python -m` wrappers unless unavoidable.
-- For package installs or environment mutation, show the exact command and get approval first.
 - Activating in `Bash` tool calls (non-interactive subshells): prefer `mamba activate <env>` if `mamba` is on PATH (single command, no sourcing). Otherwise use the portable form `source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate <env>` — `conda info --base` resolves the right path on whatever machine you're on. Never hardcode `/abs/path/conda.sh`; that would require a per-machine allowlist entry.
 - `Bash(ruff format *)` is intentionally allowlisted in some projects even though it writes files in place. Don't suggest narrowing it to `--check`/`--diff` only during permission-allowlist cleanups; the user has weighed the safety cost.
 

@@ -10,7 +10,8 @@
       "Bash(parallel --version)",
       "Bash(tmux -V)",
       "Bash(cat ~/.claude/settings.json 2>/dev/null | head -30)",
-      "Read(//home/wma/.claude/**)"
+      "Read(//home/wma/.claude/**)",
+      "Bash(gh auth *)"
     ],
     "additionalDirectories": [
       "/tmp",
