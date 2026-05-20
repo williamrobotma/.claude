@@ -1,5 +1,5 @@
 # CLAUDE.md — Global Preferences
-### Context
+## Context
 Solo researcher; personal experimentation only. No enterprise/production complexity. All added complexity has a real cost.
 
 **Governing principle: code is not just for the machine — it is the primary interface between the user and their own work. Prefer the implementation the user can read, debug, and modify without friction over the one that is merely correct. If the user would need to re-read it to understand what it does, it is not simple enough.**
@@ -12,6 +12,8 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Don't edit currently running files without explicit approval.
 - After edits, run a quick verification.
 - When revising an artifact the user has signaled is "mostly good" (a plan, doc, or code file), produce minimal targeted edits — not a parallel rewrite. Quote the specific lines/sections being changed and the replacement text; don't restate unchanged scaffolding.
+- When making multiple changes, present them as discrete labeled units — not interleaved in a wall of output. Each unit: what changed, where, and one-line why. Unrelated changes get separate units even if delivered together.
+- Don't mix structural changes with style/cleanup changes in the same edit. Flag cleanup separately so the user can accept or skip it without untangling it from logic changes.
 
 ## Tidy+Review Pass
 Unless narrowed or opted out, finish code-editing tasks with a pass over touched code: check for bugs, regressions, edge cases, and test gaps; fix comments, docstrings, formatting, and imports; note streamlining opportunities. Scope: current uncommitted changes and/or current session, whichever is broader.
@@ -25,9 +27,6 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 ---
 
 ## Python
-
-### Context
-Solo researcher; personal experimentation only. No enterprise/production complexity. All added complexity has a real cost.
 
 ### Design
 - When choosing between two approaches that both work, prefer the one the user can scan and modify confidently. Cleverness that saves lines but costs comprehension is a net loss.
@@ -47,8 +46,10 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Prefer the form that reads closest to plain English. If a fluent Python reader would pause, simplify.
 - Add type hints to all new public function signatures. Internal helpers (prefixed `_`) may omit hints if the types are obvious from context.
 - Docstrings: if the name and signature make the contract self-evident (PEP 257), a single summary line is the complete docstring — do not add more. When the contract isn't obvious, add Google-style Args/Returns/Raises; keep each field a phrase or short clause, not a prose paragraph.
+- If a function exists to encode a non-obvious design decision (not just logic), say so in the docstring summary — one clause. "Clips before normalizing to avoid division instability" is load-bearing; "adds two numbers" is not.
 - Both docstrings and comments: minimize explanatory prose. Prefer structured information — Args/Returns/Raises fields, brief inline notes — over sentences and paragraphs. If it can be said in a phrase, don't write a sentence.
 - Comment only when the reader can't see *why* from a quick pass — dense control flow, shape/index alignment, sampling logic, fallback paths, cross-helper coordination. If still non-obvious after simplification, comment at point of use.
+- Explain *why* a choice was made when the alternative was reasonable: a skipped optimization, a deliberate constraint, a non-obvious invariant. One phrase is enough.
 - For scripts with runtime stages, add concise stage-level logging (active phase, resolved choices, output writes).
 
 ### REPL Scripts and Notebooks
@@ -60,3 +61,7 @@ Use VS Code interactive cells: `# %% [markdown]` + title, then `# %%` per runnab
 
 ### Python Verification
 After Python edits, the tidy+review pass includes running `ruff`, `pylint`, and a targeted syntax or smoke check, unless told not to.
+
+### Review
+- After any non-trivial edit, produce a brief change summary: what was changed, what was deliberately left alone, and any decisions that had alternatives worth knowing about.
+- If a design choice has a meaningful tradeoff (e.g. chose X over Y because Z), surface it — don't bury it in the implementation. The user should be able to disagree before it becomes load-bearing.
