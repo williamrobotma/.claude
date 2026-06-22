@@ -7,3 +7,6 @@
 !sync.sh
 !commands/
 !commands/sync-push.md
+!skills/
+!skills/**/
+!skills/**/*.md
