@@ -121,6 +121,18 @@
       "mcp__plugin_github_github__search_repositories",
       "mcp__plugin_github_github__search_users"
     ],
+    "deny": [
+      "Read(//home/wma/.claude/.credentials.json)",
+      "Read(//home/wma/.claude/settings.local.json)",
+      "Read(//home/wma/.ssh/id_*)",
+      "Read(./**/settings.local.json)",
+      "Read(./**/.env)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(rm -rf $HOME*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)"
+    ],
     "defaultMode": "default",
     "additionalDirectories": [
       "/tmp"
