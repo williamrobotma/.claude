@@ -4,3 +4,6 @@
 !.gitignore
 !README.md
 !LICENSE
+!sync.sh
+!commands/
+!commands/sync-push.md

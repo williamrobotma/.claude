@@ -79,21 +79,53 @@ When a push is rejected (histories diverged):
 Pull when the app is idle: the working tree is your live config, so a pull rewrites it
 under any running session. Restart the session if `settings.json` changed.
 
+## Automation
+
+`sync.sh` plus two Claude Code hooks (defined in `settings.json`, so they travel
+with the repo and self-distribute) keep machines current, while the push stays a
+deliberate, confirmed step:
+
+- `SessionStart` -> `sync.sh pull` : fast-forward only; automatic, never merges.
+- `SessionEnd`   -> `sync.sh save` : commits local changes locally; never pushes.
+- Push is manual: `/sync-push` (or `bash ~/.claude/sync.sh push`). Bare `git push`
+  is not in the permission allowlist, so it prompts - that prompt is the gate.
+
+Hooks run non-interactive shell and bypass the permission system, which is why push
+is kept out of them: a hooked push could not be confirmed. `sync.sh` always exits 0
+(never stalls a session) and logs to `sync.log` (untracked).
+
 ## New-machine bootstrap
 
 Fresh machine with no `~/.claude` yet:
 
     git clone git@github.com:williamrobotma/.claude.git ~/.claude
 
-Machine where Claude Code already created `~/.claude`:
+Existing `~/.claude` with content, not yet a git repo, whose local config you want
+to MERGE in. Attach the repo without touching your files, then turn on the allowlist
+so state and secrets are ignored before you stage anything:
 
     cd ~/.claude
-    # back up local copies first if you want them:
-    cp CLAUDE.md CLAUDE.md.bak 2>/dev/null; cp settings.json settings.json.bak 2>/dev/null
-    git init
+    git init -b master
     git remote add origin git@github.com:williamrobotma/.claude.git
     git fetch origin
-    git reset --hard origin/master   # overwrites tracked files with synced versions
+    git reset --mixed origin/master                  # adopt history; keep local files
+    git branch --set-upstream-to=origin/master master
+    git checkout origin/master -- .gitignore README.md LICENSE sync.sh commands
+    chmod +x sync.sh
+    git check-ignore .credentials.json               # prints the name => safely ignored
 
-Untracked local state (sessions, caches, credentials) is preserved by the reset:
-the allowlist ignores it, so `reset --hard` only touches tracked files.
+Now only `CLAUDE.md` and `settings.json` show as modified (your local versions).
+Reconcile each, then commit and push:
+
+    # take the synced version:    git checkout origin/master -- CLAUDE.md
+    # or merge by hand: edit CLAUDE.md / settings.json to combine both sides
+    git add -A && git commit -m "merge $(hostname) local config"
+    git push
+
+`settings.json` is JSON: union the `permissions.allow` list and keep any local keys,
+rather than picking one side wholesale. Make sure the merged file keeps the `hooks`
+block - that is what activates the auto pull/commit on this machine.
+
+To instead discard local and take the canonical config wholesale:
+
+    git reset --hard origin/master
