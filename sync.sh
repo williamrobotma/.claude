@@ -15,7 +15,7 @@ note() { echo "$(date '+%F %T') $*" >>"$log"; }
 
 case "${1:-}" in
   pull)
-    git pull --ff-only --quiet 2>>"$log" || note "pull: diverged, resolve manually"
+    git pull --ff-only --quiet 2>>"$log" || note "pull: failed (auth/network or diverged; see git error above)"
     ;;
   save)
     if [ -n "$(git status --porcelain)" ]; then
@@ -26,7 +26,7 @@ case "${1:-}" in
     [ "$ahead" -gt 0 ] && note "save: $ahead commit(s) pending push (run /sync-push)"
     ;;
   push)
-    git pull --ff-only --quiet 2>>"$log" || { note "push: diverged, resolve manually"; exit 0; }
+    git pull --ff-only --quiet 2>>"$log" || { note "push: aborted - pull failed (auth/network or diverged; see git error above)"; exit 0; }
     git push --quiet 2>>"$log" && note "push: ok" || note "push: failed"
     ;;
   *)

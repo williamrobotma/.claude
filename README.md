@@ -95,15 +95,18 @@ deliberate, confirmed step:
 - Push is manual: `/sync-push` (or `bash ~/.claude/sync.sh push`). Bare `git push`
   is not in the permission allowlist, so it prompts - that prompt is the gate.
 
-Hooks run non-interactive shell and bypass the permission system, which is why push
-is kept out of them: a hooked push could not be confirmed. `sync.sh` always exits 0
-(never stalls a session) and logs to `sync.log` (untracked).
+Hooks run a non-interactive shell with no SSH agent, so `origin` uses HTTPS and
+`gh auth setup-git` lets the hook authenticate from gh's stored token; the agent-backed
+SSH path only works in interactive sessions. Hooks also bypass the permission system,
+which is why push is kept out of them: a hooked push could not be confirmed. `sync.sh`
+always exits 0 (never stalls a session) and logs to `sync.log` (untracked).
 
 ## New-machine bootstrap
 
 Fresh machine with no `~/.claude` yet:
 
-    git clone git@github.com:williamrobotma/.claude.git ~/.claude
+    git clone https://github.com/williamrobotma/.claude.git ~/.claude
+    gh auth setup-git    # let the sync hooks authenticate via gh's stored token
 
 Existing `~/.claude` with content, not yet a git repo, whose local config you want
 to MERGE in. Attach the repo without touching your files, then turn on the allowlist
@@ -111,7 +114,8 @@ so state and secrets are ignored before you stage anything:
 
     cd ~/.claude
     git init -b master
-    git remote add origin git@github.com:williamrobotma/.claude.git
+    git remote add origin https://github.com/williamrobotma/.claude.git
+    gh auth setup-git                                # hooks auth via gh token, no SSH agent
     git fetch origin
     git reset --mixed origin/master                  # adopt history; keep local files
     git branch --set-upstream-to=origin/master master
