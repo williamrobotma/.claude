@@ -19,6 +19,9 @@ machine-independent config and ignores everything else.
     !.gitignore
     !README.md
     !LICENSE
+    !sync.sh
+    !commands/
+    !commands/sync-push.md
 
 This is deliberate. The directory contains secrets and volatile state, so the safe
 default is "track nothing unless explicitly allowed." Never invert this to a denylist:
@@ -26,9 +29,11 @@ one forgotten entry leaks a credential.
 
 Tracked:
 
-- `CLAUDE.md`     - global preferences / instructions
-- `settings.json` - Claude Code harness settings (permissions, plugins, model)
-- `.gitignore`    - the allowlist itself
+- `CLAUDE.md` - global preferences / instructions
+- `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
+- `.gitignore` - the allowlist itself
+- `sync.sh` - the pull/save/push sync script the hooks run
+- `commands/sync-push.md` - the `/sync-push` slash command (gated push)
 - `README.md`, `LICENSE`
 
 Deliberately NOT tracked (and why):
