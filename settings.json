@@ -166,7 +166,7 @@
       }
     ]
   },
-  "model": "opus",
+  "model": "sonnet",
   "worktree": {
     "baseRef": "fresh"
   },
