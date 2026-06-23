@@ -139,9 +139,6 @@
     ]
   },
   "hooks": {
-    "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "bash $HOME/.claude/sync.sh pull" } ] }
-    ],
     "SessionEnd": [
       { "hooks": [ { "type": "command", "command": "bash $HOME/.claude/sync.sh save" } ] }
     ]
