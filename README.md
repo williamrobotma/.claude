@@ -20,8 +20,12 @@ machine-independent config and ignores everything else.
     !README.md
     !LICENSE
     !sync.sh
+    !statusline-command.sh
     !commands/
     !commands/sync-push.md
+    !skills/
+    !skills/**/
+    !skills/**/*.md
 
 This is deliberate. The directory contains secrets and volatile state, so the safe
 default is "track nothing unless explicitly allowed." Never invert this to a denylist:
@@ -33,7 +37,9 @@ Tracked:
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
 - `sync.sh` - the pull/save/push sync script the hooks run
+- `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
+- `skills/**/*.md` - user skills (markdown only; deny-by-default holds inside skills/)
 - `README.md`, `LICENSE`
 
 Deliberately NOT tracked (and why):
@@ -44,6 +50,8 @@ Deliberately NOT tracked (and why):
   `session-env/` - per-machine session state; append-only, conflict-prone
 - `daemon.*`, `*.lock`, `*-status.json` - live process state; harmful to share
 - `cache/`, `paste-cache/`, `backups/`, `*-cache.json` - regenerable caches
+- `plugins/` - per-machine install state (abs paths, version SHAs, catalog cache);
+  your enabled set lives in `settings.json` `enabledPlugins`
 
 ## Adding a new tracked file
 
@@ -119,8 +127,8 @@ so state and secrets are ignored before you stage anything:
     git fetch origin
     git reset --mixed origin/master                  # adopt history; keep local files
     git branch --set-upstream-to=origin/master master
-    git checkout origin/master -- .gitignore README.md LICENSE sync.sh commands
-    chmod +x sync.sh
+    git checkout origin/master -- .gitignore README.md LICENSE sync.sh statusline-command.sh commands skills
+    chmod +x sync.sh statusline-command.sh
     git check-ignore .credentials.json               # prints the name => safely ignored
 
 Now only `CLAUDE.md` and `settings.json` show as modified (your local versions).
