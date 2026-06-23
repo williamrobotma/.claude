@@ -22,7 +22,12 @@ machine-independent config and ignores everything else.
     !sync.sh
     !commands/
     !commands/sync-push.md
+    !skills/
+    !skills/**/
+    !skills/**/*.md
 
+`skills/` admits only `*.md`: the gate stays deny-by-default even inside it, so a
+non-md file an agent drops there (a token, a cache) is ignored, not auto-tracked.
 This is deliberate. The directory contains secrets and volatile state, so the safe
 default is "track nothing unless explicitly allowed." Never invert this to a denylist:
 one forgotten entry leaks a credential.
@@ -32,8 +37,9 @@ Tracked:
 - `CLAUDE.md` - global preferences / instructions
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
-- `sync.sh` - the pull/save/push sync script the hooks run
+- `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
+- `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
 - `README.md`, `LICENSE`
 
 Deliberately NOT tracked (and why):
@@ -58,14 +64,14 @@ directory too:
 
 Git is snapshot sync, not real-time sync. Two habits keep it painless:
 
-1. Pull before you edit, push right after.
-2. Use fast-forward-only pulls so a machine never silently merges.
+1. Pull at the start of a config session, push right after editing.
+2. Pulls MERGE, so a divergent machine reconciles instead of refusing or overwriting.
 
 Typical session:
 
-    git pull --ff-only
+    bash ~/.claude/sync.sh pull       # or /sync-push, which pulls then pushes
     # ... edit config, or let Claude Code change settings.json ...
-    git add -A && git commit -m "..." && git push
+    /sync-push                        # merge in the remote, then push
 
 ## Handling mismatches / conflicts
 
@@ -73,68 +79,80 @@ Typical session:
 machine. To minimize churn, push machine-specific keys into `settings.local.json`
 (untracked) and keep `settings.json` to the shared baseline.
 
-When a push is rejected (histories diverged):
+A merge pull reconciles a divergent remote on its own; it only stops if the same
+lines clash, leaving conflict markers in the small file(s):
 
-    git pull --ff-only      # refuses on divergence -> then:
-    git pull --rebase       # replay local commits on top of remote
-    # resolve conflict markers in the small file(s)
-    git add <file> && git rebase --continue
-    git push
+    bash ~/.claude/sync.sh pull   # merges; stops with markers only on a real clash
+    # resolve the markers in CLAUDE.md / settings.json
+    git add <file> && git commit  # completes the merge
+    /sync-push
 
 Pull when the app is idle: the working tree is your live config, so a pull rewrites it
 under any running session. Restart the session if `settings.json` changed.
 
 ## Automation
 
-`sync.sh` plus two Claude Code hooks (defined in `settings.json`, so they travel
-with the repo and self-distribute) keep machines current, while the push stays a
-deliberate, confirmed step:
+`sync.sh` plus one Claude Code hook (defined in `settings.json`, so it travels with
+the repo and self-distributes):
 
-- `SessionStart` -> `sync.sh pull` : fast-forward only; automatic, never merges.
-- `SessionEnd`   -> `sync.sh save` : commits local changes locally; never pushes.
-- Push is manual: `/sync-push` (or `bash ~/.claude/sync.sh push`). Bare `git push`
-  is not in the permission allowlist, so it prompts - that prompt is the gate.
+- `SessionEnd` -> `sync.sh save` : commits local changes locally. No network, no
+  auth - works on every machine; logs how many commits await push.
 
-Hooks run a non-interactive shell with no SSH agent, so `origin` uses HTTPS and
-`gh auth setup-git` lets the hook authenticate from gh's stored token; the agent-backed
-SSH path only works in interactive sessions. Hooks also bypass the permission system,
-which is why push is kept out of them: a hooked push could not be confirmed. `sync.sh`
-always exits 0 (never stalls a session) and logs to `sync.log` (untracked).
+Everything that touches the network is interactive and deliberate:
+
+- `/sync-push` (or `bash ~/.claude/sync.sh push`) : merge in the remote, then push.
+- `bash ~/.claude/sync.sh pull` : merge in the remote (run at the start of a session).
+
+Why no hook does the network: a hook runs a non-interactive shell with no SSH agent,
+so it cannot authenticate a passphrase-protected key (nor be confirmed - hooks bypass
+the permission system). Network sync therefore runs only in an interactive session,
+where your agent / credentials are loaded. Transport is per-machine and untracked (it
+lives in `.git/config`): SSH `git@github.com:...` if your agent holds the key, or HTTPS
+if this machine has `gh` or a stored credential.
+
+pull/push MERGE rather than fast-forward-only: a divergent remote is reconciled, not
+refused, and nothing on either side is silently overwritten or deleted. Bare `git push`
+is not in the permission allowlist, so `/sync-push` prompts - that prompt is the gate.
+`sync.sh` always exits 0 (never stalls a session) and logs to `sync.log` (untracked).
 
 ## New-machine bootstrap
 
-Fresh machine with no `~/.claude` yet:
+Fresh machine with no `~/.claude` yet - just clone (nothing local to lose):
 
-    git clone https://github.com/williamrobotma/.claude.git ~/.claude
-    gh auth setup-git    # let the sync hooks authenticate via gh's stored token
+    git clone git@github.com:williamrobotma/.claude.git ~/.claude
+    # or HTTPS if this machine has no github SSH key set up:
+    #   git clone https://github.com/williamrobotma/.claude.git ~/.claude
 
-Existing `~/.claude` with content, not yet a git repo, whose local config you want
-to MERGE in. Attach the repo without touching your files, then turn on the allowlist
-so state and secrets are ignored before you stage anything:
+Existing `~/.claude` with content you want to MERGE in. Do it as a real merge so a
+file that exists only on the remote can never be deleted, and install the allowlist
+(the gate) BEFORE staging anything so secrets/state stay ignored:
 
     cd ~/.claude
     git init -b master
-    git remote add origin https://github.com/williamrobotma/.claude.git
-    gh auth setup-git                                # hooks auth via gh token, no SSH agent
+    git remote add origin git@github.com:williamrobotma/.claude.git   # or the HTTPS URL
     git fetch origin
-    git reset --mixed origin/master                  # adopt history; keep local files
+
+    git checkout origin/master -- .gitignore     # 1. install the gate FIRST
+    git add -A                                    # 2. gate active => only allowlisted files staged
+    git commit -m "local ~/.claude on $(hostname) before merge"
+
+    git merge --no-commit --allow-unrelated-histories origin/master   # 3. union; pause to review
+    # resolve any conflicts: union settings.json permissions.allow and keep its hooks
+    # block; for infra files just take the remote (git checkout origin/master -- sync.sh)
+    git add -A && git commit                      # finalize (works clean or post-conflict)
     git branch --set-upstream-to=origin/master master
-    git checkout origin/master -- .gitignore README.md LICENSE sync.sh commands
+
     chmod +x sync.sh
-    git check-ignore .credentials.json               # prints the name => safely ignored
+    git check-ignore .credentials.json           # prints the name => safely ignored
+    git push                                      # once your agent holds the key
 
-Now only `CLAUDE.md` and `settings.json` show as modified (your local versions).
-Reconcile each, then commit and push:
+Why a merge and not `git reset origin/master`: a reset makes HEAD the remote but
+leaves only this machine's files in the tree, so every remote-only file (`sync.sh`,
+`skills/`, ...) looks DELETED - and `add -A && commit && push` would wipe it for every
+machine. A merge takes the union and conflicts only on real overlaps; a plain
+`git push` is rejected by git unless it fast-forwards, so it cannot nuke the remote.
 
-    # take the synced version:    git checkout origin/master -- CLAUDE.md
-    # or merge by hand: edit CLAUDE.md / settings.json to combine both sides
-    git add -A && git commit -m "merge $(hostname) local config"
-    git push
-
-`settings.json` is JSON: union the `permissions.allow` list and keep any local keys,
-rather than picking one side wholesale. Make sure the merged file keeps the `hooks`
-block - that is what activates the auto pull/commit on this machine.
-
-To instead discard local and take the canonical config wholesale:
+To instead discard local entirely and take the canonical config (deliberate; this
+DOES destroy local changes):
 
     git reset --hard origin/master
