@@ -156,7 +156,14 @@
   },
   "hooks": {
     "SessionEnd": [
-      { "hooks": [ { "type": "command", "command": "bash $HOME/.claude/sync.sh save" } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/sync.sh save"
+          }
+        ]
+      }
     ]
   },
   "model": "opus",
@@ -182,7 +189,7 @@
     "security-guidance@claude-plugins-official": true
   },
   "enableWorkflows": true,
-  "effortLevel": "xhigh",
+  "effortLevel": "low",
   "advisorModel": "opus",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
