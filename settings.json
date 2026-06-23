@@ -164,7 +164,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "/home/wma/.claude/statusline-command.sh"
+    "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "claude-md-management@claude-plugins-official": true,
