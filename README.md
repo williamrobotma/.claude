@@ -20,6 +20,7 @@ machine-independent config and ignores everything else.
     !README.md
     !LICENSE
     !sync.sh
+    !statusline-command.sh
     !commands/
     !commands/sync-push.md
     !skills/
@@ -38,6 +39,7 @@ Tracked:
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
+- `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
 - `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
 - `README.md`, `LICENSE`
@@ -50,6 +52,8 @@ Deliberately NOT tracked (and why):
   `session-env/` - per-machine session state; append-only, conflict-prone
 - `daemon.*`, `*.lock`, `*-status.json` - live process state; harmful to share
 - `cache/`, `paste-cache/`, `backups/`, `*-cache.json` - regenerable caches
+- `plugins/` - per-machine install state (abs paths, version SHAs, catalog cache);
+  your enabled set lives in `settings.json` `enabledPlugins`
 
 ## Adding a new tracked file
 
@@ -106,9 +110,8 @@ Everything that touches the network is interactive and deliberate:
 Why no hook does the network: a hook runs a non-interactive shell with no SSH agent,
 so it cannot authenticate a passphrase-protected key (nor be confirmed - hooks bypass
 the permission system). Network sync therefore runs only in an interactive session,
-where your agent / credentials are loaded. Transport is per-machine and untracked (it
-lives in `.git/config`): SSH `git@github.com:...` if your agent holds the key, or HTTPS
-if this machine has `gh` or a stored credential.
+where your ssh-agent holds the unlocked key. Transport is SSH only
+(`git@github.com:...`); git authenticates via the ssh-agent, never a token.
 
 pull/push MERGE rather than fast-forward-only: a divergent remote is reconciled, not
 refused, and nothing on either side is silently overwritten or deleted. Bare `git push`
@@ -120,8 +123,6 @@ is not in the permission allowlist, so `/sync-push` prompts - that prompt is the
 Fresh machine with no `~/.claude` yet - just clone (nothing local to lose):
 
     git clone git@github.com:williamrobotma/.claude.git ~/.claude
-    # or HTTPS if this machine has no github SSH key set up:
-    #   git clone https://github.com/williamrobotma/.claude.git ~/.claude
 
 Existing `~/.claude` with content you want to MERGE in. Do it as a real merge so a
 file that exists only on the remote can never be deleted, and install the allowlist
@@ -129,7 +130,7 @@ file that exists only on the remote can never be deleted, and install the allowl
 
     cd ~/.claude
     git init -b master
-    git remote add origin git@github.com:williamrobotma/.claude.git   # or the HTTPS URL
+    git remote add origin git@github.com:williamrobotma/.claude.git
     git fetch origin
 
     git checkout origin/master -- .gitignore     # 1. install the gate FIRST
@@ -142,7 +143,7 @@ file that exists only on the remote can never be deleted, and install the allowl
     git add -A && git commit                      # finalize (works clean or post-conflict)
     git branch --set-upstream-to=origin/master master
 
-    chmod +x sync.sh
+    chmod +x sync.sh statusline-command.sh
     git check-ignore .credentials.json           # prints the name => safely ignored
     git push                                      # once your agent holds the key
 

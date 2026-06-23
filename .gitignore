@@ -5,6 +5,7 @@
 !README.md
 !LICENSE
 !sync.sh
+!statusline-command.sh
 !commands/
 !commands/sync-push.md
 !skills/
