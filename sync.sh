@@ -18,6 +18,11 @@ log="$repo/sync.log"
 cd "$repo" 2>/dev/null || exit 0
 note() { echo "$(date '+%F %T') $*" >>"$log"; }
 
+# Hooks / the editor's `bash -c` don't source ~/.bashrc, so the shared ssh-agent
+# socket isn't in their env. Point at it here (keep any already-set value) so
+# pull/push can reach the agent. The agent + key load are managed by ~/.bashrc.
+export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-$HOME/.ssh/agent.sock}"
+
 case "${1:-}" in
   pull)
     git pull --no-rebase --no-edit --quiet 2>>"$log" \

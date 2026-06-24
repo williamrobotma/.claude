@@ -43,6 +43,10 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
   pkill matches and kills the wrapper shell first. Use
   `kill -KILL -$(ps -o pgid= -p <pid> | tr -d ' ')`.
 
+## Git & persisting guidance
+- Commit only a wrapped-up repo: no untracked junk, stale docs, or half-finished edits; `git add -A` must be the correct call and `git status` clean afterward. Never selective-add that leaves loose threads; never leave a relevant doc (handoff/status note) out of its commit.
+- Durable guidance/preferences/rules live in git-tracked files (here, or a tracked project CLAUDE.md/doc) - never in the gitignored auto-memory under `~/.claude/projects/*/memory/`, which doesn't sync across machines.
+
 ---
 
 ## Python
