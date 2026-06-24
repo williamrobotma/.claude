@@ -156,13 +156,20 @@
   },
   "hooks": {
     "SessionEnd": [
-      { "hooks": [ { "type": "command", "command": "bash $HOME/.claude/sync.sh save" } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/sync.sh save"
+          }
+        ]
+      }
     ]
   },
-  "model": "opus",
   "worktree": {
     "baseRef": "fresh"
   },
+  "enableWorkflows": true,
   "statusLine": {
     "type": "command",
     "command": "/home/wma/.claude/statusline-command.sh"
@@ -181,7 +188,6 @@
     "github@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true
   },
-  "enableWorkflows": true,
   "effortLevel": "xhigh",
   "advisorModel": "opus",
   "tui": "default",
@@ -193,5 +199,6 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "model": "gemma4-26b-a4b-it-heretic-q4-k-m"
 }
