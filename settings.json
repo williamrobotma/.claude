@@ -153,6 +153,7 @@
       "/tmp"
     ]
   },
+  "model": "opus",
   "hooks": {
     "SessionEnd": [
       {
@@ -165,10 +166,10 @@
       }
     ]
   },
-  "model": "opus",
   "worktree": {
     "baseRef": "fresh"
   },
+  "enableWorkflows": true,
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline-command.sh"
@@ -184,10 +185,9 @@
     "feature-dev@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
+    "github@claude-plugins-official": false,
     "security-guidance@claude-plugins-official": true
   },
-  "enableWorkflows": true,
   "effortLevel": "xhigh",
   "advisorModel": "opus",
   "tui": "default",
