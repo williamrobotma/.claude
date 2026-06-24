@@ -154,6 +154,7 @@
       "/tmp"
     ]
   },
+  "model": "gemma4-26b-a4b-it-heretic-q4-k-m",
   "hooks": {
     "SessionEnd": [
       {
@@ -199,6 +200,5 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "model": "gemma4-26b-a4b-it-heretic-q4-k-m"
+  "agentPushNotifEnabled": true
 }
