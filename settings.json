@@ -138,9 +138,8 @@
     ],
     "deny": [
       "Read(~/.claude/.credentials.json)",
-      "Read(~/.claude/history.jsonl)",
       "Read(~/.ssh/id_*)",
-      "Read(./**/settings.local.json)",
+      "Read(~/.env)",
       "Read(./**/.env)",
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~*)",
