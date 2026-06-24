@@ -5,15 +5,25 @@ input=$(cat)
 
 user_host="$(whoami)@$(hostname -s)"
 
-IFS=$'\x1f' read -r cwd model effort used_tokens ctx_max five_h seven_d <<< "$(printf '%s' "$input" | jq -r '[
-  .workspace.current_dir,
-  .model.display_name,
-  .effort.level,
-  .context_window.total_input_tokens,
-  .context_window.context_window_size,
-  .rate_limits.five_hour.used_percentage,
-  .rate_limits.seven_day.used_percentage
-] | join([31] | implode)')"
+IFS=$'\x1f' read -r cwd model effort used_tokens ctx_max five_h seven_d <<< "$(printf '%s' "$input" | python3 -c '
+import json, sys
+d = json.load(sys.stdin)
+def g(*keys):                       # nested lookup; missing/None -> "" (matches jq join of nulls)
+    x = d
+    for k in keys:
+        if not isinstance(x, dict): return ""
+        x = x.get(k)
+    return "" if x is None else str(x)
+print("\x1f".join([
+    g("workspace", "current_dir"),
+    g("model", "display_name"),
+    g("effort", "level"),
+    g("context_window", "total_input_tokens"),
+    g("context_window", "context_window_size"),
+    g("rate_limits", "five_hour", "used_percentage"),
+    g("rate_limits", "seven_day", "used_percentage"),
+]))
+')"
 
 # Use CLAUDE_CODE_MAX_CONTEXT_TOKENS (custom limit) if set and smaller than
 # Claude Code's reported max_tokens; otherwise fall back to max_tokens.

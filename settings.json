@@ -137,10 +137,9 @@
       "mcp__plugin_github_github__search_users"
     ],
     "deny": [
-      "Read(//home/wma/.claude/.credentials.json)",
-      "Read(//home/wma/.claude/settings.local.json)",
-      "Read(//home/wma/.claude/history.jsonl)",
-      "Read(//home/wma/.ssh/id_*)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(~/.claude/history.jsonl)",
+      "Read(~/.ssh/id_*)",
       "Read(./**/settings.local.json)",
       "Read(./**/.env)",
       "Bash(rm -rf /*)",
@@ -172,7 +171,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "/home/wma/.claude/statusline-command.sh"
+    "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "claude-md-management@claude-plugins-official": true,
