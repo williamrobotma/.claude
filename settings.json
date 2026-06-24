@@ -154,7 +154,7 @@
       "/tmp"
     ]
   },
-  "model": "gemma4-26b-a4b-it-heretic-q4-k-m",
+  "model": "huihui_ai/Qwen3.6-abliterated:35b-Claude-4.7-q4_K",
   "hooks": {
     "SessionEnd": [
       {
