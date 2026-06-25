@@ -142,9 +142,10 @@
       "Read(~/.ssh/id_*)",
       "Read(~/.env)",
       "Read(./**/.env)",
-      "Bash(rm -rf /*)",
-      "Bash(rm -rf ~*)",
-      "Bash(rm -rf $HOME*)",
+      "Bash(rm * /)",
+      "Bash(rm * ~*)",
+      "Bash(rm * $HOME*)",
+      "Bash(rm * ${HOME}*)",
       "Bash(git push --force*)",
       "Bash(git push -f *)"
     ],
