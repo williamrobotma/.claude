@@ -154,7 +154,7 @@
       "/tmp"
     ]
   },
-  "model": "huihui_ai/Qwen3.6-abliterated:35b-Claude-4.7-q4_K",
+  "model": "opus",
   "hooks": {
     "SessionEnd": [
       {
