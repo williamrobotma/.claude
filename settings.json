@@ -157,6 +157,17 @@
   },
   "model": "opus",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/awk-guard.py"
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "hooks": [

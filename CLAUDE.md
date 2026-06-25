@@ -9,8 +9,15 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Ask for clarification when ambiguous; never guess.
 - "Over-engineered" applies to behavior too: if it needs layered rules to explain, simplify the behavior first.
 - Don't add filtering, sanitizing, or pruning unless asked or clearly required for correctness.
+- **Research before building.** Verify from current docs, not memory (training lags fast-moving tools) that the need isn't already met before adding code or steps.
+- **Prefer an existing solution over a custom one.** When something is needed, find it before building it, in order:
+  - Already in the codebase? Reuse it; don't rewrite.
+  - In the stdlib? Use it.
+  - A native platform or tool feature? Use it.
+  - An installed dependency? Use it.
+  - None of the above? Build it, as simply as possible.
 - Don't edit currently running files without explicit approval.
-- Prefer dedicated tools (Read, Grep, Edit) over shell (`cat`, `head`, `sed`, `awk`, `echo`) for tasks they can do; shell triggers permission prompts and adds friction; drop to Bash only when no tool fits.
+- **Use Read/Grep/Glob/Edit, never shell, to read/search/edit files.** Read not `cat`/`head`/`tail`/`sed -n`; Grep not `grep`/`rg`; Glob not `find`/`ls`; Edit not `sed -i`/`echo >`. The tools never prompt; the shell forms do - and `awk`/`python -c` text-munging also bypasses the `Read` deny rules (`.env`, keys). Bash for file content only when no tool can do the job.
 - After edits, run a quick verification.
 - When revising an artifact the user has signaled is "mostly good" (a plan, doc, or code file), produce minimal targeted edits, not a parallel rewrite. Quote the specific lines/sections being changed and the replacement text; don't restate unchanged scaffolding.
 - When making multiple changes, present them as discrete labeled units, not interleaved in a wall of output. Each unit: what changed, where, and one-line why. Unrelated changes get separate units even if delivered together.
@@ -26,6 +33,9 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - No hand-aligned whitespace columns or ASCII boxes in docstrings; use Args:/Returns:/Notes:.
 - Concise = max info per word, not fewer facts. Keep every fact, shape, example, citation;
   turn prose into bullets/fields. Don't abbreviate domain terms (`cell_line`, not `line`).
+- Concise means dense per word, not fewer lines. Don't pack multiple ideas onto one
+  line to cut line count; it reads worse. Use newlines, bullets, sub-bullets, and
+  whitespace to separate distinct ideas.
 - Rewriting existing text: preserve its information exactly; flag anything added or dropped.
 - Chat: answer first, bullets/tables over paragraphs, no preamble/recap/filler.
 
