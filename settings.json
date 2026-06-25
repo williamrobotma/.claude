@@ -17,6 +17,7 @@
       "Bash(conda activate *)",
       "Bash(mamba activate *)",
       "Bash(source \"$(conda info --base)/etc/profile.d/conda.sh\"*)",
+      "Bash(source $(conda info --base)/etc/profile.d/conda.sh*)",
       "Bash(parallel --version)",
       "Bash(tmux -V)",
       "Read(//home/wma/.claude/**)",
