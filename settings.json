@@ -42,8 +42,6 @@
       "Bash(pylint *)",
       "Bash(git push --dry-run*)",
       "Bash(git push -n *)",
-      "Bash(git add --dry-run*)",
-      "Bash(git add -n *)",
       "Bash(git clean -n *)",
       "Bash(git clean --dry-run*)",
       "Bash(git pull --dry-run*)",

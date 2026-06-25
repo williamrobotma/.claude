@@ -21,6 +21,8 @@ machine-independent config and ignores everything else.
     !LICENSE
     !sync.sh
     !statusline-command.sh
+    !hooks/
+    !hooks/*.py
     !commands/
     !commands/sync-push.md
     !skills/
