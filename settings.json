@@ -107,6 +107,8 @@
       "Bash(claude mcp list*)",
       "Bash(claude mcp get *)",
       "Bash(git check-ignore *)",
+      "Bash(bash ~/.claude/sync.sh save)",
+      "Bash(bash ~/.claude/sync.sh push)",
       "Skill(hookify:hookify)",
       "Skill(hookify:hookify:*)",
       "mcp__plugin_github_github__get_me",
