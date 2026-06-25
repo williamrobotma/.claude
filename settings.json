@@ -88,6 +88,8 @@
       "Bash(git blame *)",
       "Bash(git submodule status*)",
       "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
       "Bash(ruff *)",
       "Bash(command -v *)",
       "Bash(command -V *)",
