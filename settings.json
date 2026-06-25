@@ -143,9 +143,8 @@
       "Read(~/.env)",
       "Read(./**/.env)",
       "Bash(rm * /)",
-      "Bash(rm * ~*)",
-      "Bash(rm * $HOME*)",
-      "Bash(rm * ${HOME}*)",
+      "Bash(rm -rf ~*)",
+      "Bash(rm -rf $HOME*)",
       "Bash(git push --force*)",
       "Bash(git push -f *)"
     ],
