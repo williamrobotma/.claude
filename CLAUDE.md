@@ -25,6 +25,13 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Before a non-trivial edit, state the diagnosis and planned approach in 1-3 sentences. Edit only after that's on the page. If the edit is rejected, don't re-edit; diagnose what the user didn't like before trying again.
 - When offering fix options, surface trade-offs proactively: rough diff size, user-facing impact (does it need a new flag? command change?), brittleness; and if one option matches a prior rejected attempt, name it and say what was wrong. Don't make the user fish for this.
 
+## Diagnosis & Honesty
+- Look before you explain. Asked "what's going on" - or when anything behaves unexpectedly - inspect the primary artifact (log, transcript, output, the file itself) before narrating a cause. Reasoning from priors is not diagnosis.
+- Evidence, not reassurance. State what the artifact shows; mark inference as inference ("guessing" vs "the log shows"). Never present a guess as a diagnosis. "Still running / standing by / I'll proceed" does not answer "what's wrong".
+- Observe before intervening. Don't kill, restart, or modify the thing you're diagnosing until you've read its state; intervention destroys the evidence.
+- Verify cheap-to-check limits before treating them as binding. A constraint that costs one read to test (a file's actual size vs a generic "this will overflow context" warning) - check that it applies before obeying. Not license to rationalize past real constraints (key/.env deny-rules, "don't edit running files", safety gates); those stand.
+- Async/background work: read real state from its artifact; don't infer from silence. A single in-flight call past ~60-90s is likely hung - inspect, and if so kill+restart to unblock. Avoid fanning out many parallel network/tool calls across concurrent agents; a shared limiter can stall them all at once.
+
 ## Writing (comments, docstrings, commit messages, chat)
 - ASCII only (standard ANSI keyboard). No Unicode symbols: `->` not the arrow glyph,
   `<-` / `<-->` for left/bidirectional, `x` not the multiply sign, `-` not middot.
