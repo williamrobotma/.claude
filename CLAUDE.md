@@ -26,11 +26,10 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - When offering fix options, surface trade-offs proactively: rough diff size, user-facing impact (does it need a new flag? command change?), brittleness; and if one option matches a prior rejected attempt, name it and say what was wrong. Don't make the user fish for this.
 
 ## Diagnosis & Honesty
-- Look before you explain. Asked "what's going on" - or when anything behaves unexpectedly - inspect the primary artifact (log, transcript, output, the file itself) before narrating a cause. Reasoning from priors is not diagnosis.
-- Evidence, not reassurance. State what the artifact shows; mark inference as inference ("guessing" vs "the log shows"). Never present a guess as a diagnosis. "Still running / standing by / I'll proceed" does not answer "what's wrong".
-- Observe before intervening. Don't kill, restart, or modify the thing you're diagnosing until you've read its state; intervention destroys the evidence.
-- Verify cheap-to-check limits before treating them as binding. A constraint that costs one read to test (a file's actual size vs a generic "this will overflow context" warning) - check that it applies before obeying. Not license to rationalize past real constraints (key/.env deny-rules, "don't edit running files", safety gates); those stand.
-- Async/background work: read real state from its artifact; don't infer from silence. A single in-flight call past ~60-90s is likely hung - inspect, and if so kill+restart to unblock. Avoid fanning out many parallel network/tool calls across concurrent agents; a shared limiter can stall them all at once.
+- Look before explaining. On "what's going on" or any surprise, read the primary artifact (log, transcript, output, the file) before naming a cause - inference from priors is not diagnosis. Never present a guess as one (mark "guessing" vs "the log shows"); "still running / standing by / I'll proceed" is not an answer.
+- Observe before intervening. Don't kill, restart, or modify what you're diagnosing before reading its state; intervention destroys the evidence.
+- Verify cheap-to-check limits before obeying: a file's actual size vs a generic "will overflow context" warning. Not license to bypass real constraints (key/.env deny-rules, "don't edit running files", safety gates).
+- Async work: read state from its artifact, don't infer from silence. An in-flight call past ~60-90s is likely hung - inspect, then kill+restart to unblock. Don't fan out many parallel net/tool calls across concurrent agents; a shared limiter stalls them all.
 
 ## Writing (comments, docstrings, commit messages, chat)
 - ASCII only (standard ANSI keyboard). No Unicode symbols: `->` not the arrow glyph,
@@ -38,16 +37,15 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Em-dash: use `:` or `;` where applicable, else ` - `. Pick the best separator for the
   context; it need not be prose punctuation (`->`, `|`, `:` are fine in structured text).
 - No hand-aligned whitespace columns or ASCII boxes in docstrings; use Args:/Returns:/Notes:.
-- Concise = max info per word, not fewer facts. Keep every fact, shape, example, citation;
-  turn prose into bullets/fields. Don't abbreviate domain terms (`cell_line`, not `line`).
-- Concise means dense per word, not fewer lines. Don't pack multiple ideas onto one
-  line to cut line count; it reads worse. Use newlines, bullets, sub-bullets, and
-  whitespace to separate distinct ideas.
+- Concise = dense per word, not fewer facts and not fewer lines. Keep every fact,
+  shape, example, citation (turn prose into bullets/fields; don't abbreviate domain
+  terms - `cell_line`, not `line`), but don't cram ideas onto one line to save
+  lines; separate them with newlines and sub-bullets.
 - Rewriting existing text: preserve its information exactly; flag anything added or dropped.
 - Chat: answer first, bullets/tables over paragraphs, no preamble/recap/filler.
 
 ## Tidy+Review Pass
-Unless narrowed or opted out, finish code-editing tasks with a pass over touched code: check for code smells, antipatterns, bugs, regressions, edge cases, and test gaps; fix comments, docstrings, formatting, and imports; note streamlining opportunities. Scope: current uncommitted changes and/or current session, whichever is broader.
+Unless narrowed or opted out, finish code-editing tasks with a pass over touched code: check for code smells, antipatterns, bugs, regressions, edge cases, and test gaps; fix comments, docstrings, formatting, and imports; note streamlining opportunities. Scope: current uncommitted changes and/or current session, whichever is broader (the sanctioned exception to 'only do what is asked').
 
 After refactoring: scan for dead assignments and orphaned functions left over from the previous structure: variables initialized but never read, wrapper functions that exist solely to forward to one other call.
 
@@ -70,7 +68,8 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 ## Python
 
 ### Design
-- When choosing between two approaches that both work, prefer the one the user can scan and modify confidently. Cleverness that saves lines but costs comprehension is a net loss.
+- Python is the glue, not the kernel - it pays the readability tax: you re-read and rewire it, the compiled/vectorized kernels under it you don't. Push complexity DOWN into named, validated functions; keep the orchestration above boringly explicit and scannable.
+- Vectorize the inner loop for speed, not the glue for cleverness: a one-liner you must re-derive to debug is a net loss, and the future reader of your glue is usually you.
 - Least complex solution that works; simple, explicit control flow over layered machinery.
 - No speculative guards, validation, or branching; add only for real invariants or actual failures.
 - Fail-visible over silent-skip: a guard that quietly returns on unexpected-empty/degenerate input hides bugs. Let it surface (blank output, error) unless that state is known and benign.
@@ -101,6 +100,9 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 ### REPL Scripts and Notebooks
 - Use VS Code interactive cells: `# %% [markdown]` + title, then `# %%` per runnable block. Section top-level flow only; don't create dozens of tiny cells.
 - Main path scannable top-to-bottom. Definitions near use. Inline single-use helpers; extract only genuinely reused or dense logic.
+- Notebooks for exploration; once logic is stable, extract it into an importable `.py` module (testing, reuse, diffs).
+- "Restart & Run All" top-to-bottom is the definition of correct; distrust hidden or out-of-order cell state.
+- Never comment/uncomment to switch behavior; use `if/else` or a parameter - keeps every path runnable and diff-able.
 
 ### Python Environment
 - `Bash(ruff format *)` is intentionally allowlisted in some projects even though it writes files in place. Don't suggest narrowing it to `--check`/`--diff` only during permission-allowlist cleanups; the user has weighed the safety cost.
@@ -109,5 +111,4 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 After Python edits, the tidy+review pass includes running `ruff`, `pylint`, and a targeted syntax or smoke check, unless told not to.
 
 ### Review
-- After any non-trivial edit, produce a brief change summary: what was changed, what was deliberately left alone, and any decisions that had alternatives worth knowing about.
-- If a design choice has a meaningful tradeoff (e.g. chose X over Y because Z), surface it; don't bury it in the implementation. The user should be able to disagree before it becomes load-bearing.
+- After a non-trivial edit, summarize what changed, what you left alone, and any choice with a viable alternative (X over Y because Z) - so the user can object before it's load-bearing.
