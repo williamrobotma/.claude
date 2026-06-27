@@ -17,6 +17,7 @@
       "Bash(conda activate *)",
       "Bash(mamba activate *)",
       "Bash(source \"$(conda info --base)/etc/profile.d/conda.sh\"*)",
+      "Bash(source $(conda info --base)/etc/profile.d/conda.sh*)",
       "Bash(parallel --version)",
       "Bash(tmux -V)",
       "Read(//home/wma/.claude/**)",
@@ -41,8 +42,6 @@
       "Bash(pylint *)",
       "Bash(git push --dry-run*)",
       "Bash(git push -n *)",
-      "Bash(git add --dry-run*)",
-      "Bash(git add -n *)",
       "Bash(git clean -n *)",
       "Bash(git clean --dry-run*)",
       "Bash(git pull --dry-run*)",
@@ -87,6 +86,8 @@
       "Bash(git blame *)",
       "Bash(git submodule status*)",
       "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
       "Bash(ruff *)",
       "Bash(command -v *)",
       "Bash(command -V *)",
@@ -106,6 +107,8 @@
       "Bash(claude mcp list*)",
       "Bash(claude mcp get *)",
       "Bash(git check-ignore *)",
+      "Bash(bash ~/.claude/sync.sh save)",
+      "Bash(bash ~/.claude/sync.sh push)",
       "Skill(hookify:hookify)",
       "Skill(hookify:hookify:*)",
       "mcp__plugin_github_github__get_me",
@@ -137,13 +140,11 @@
       "mcp__plugin_github_github__search_users"
     ],
     "deny": [
-      "Read(//home/wma/.claude/.credentials.json)",
-      "Read(//home/wma/.claude/settings.local.json)",
-      "Read(//home/wma/.claude/history.jsonl)",
-      "Read(//home/wma/.ssh/id_*)",
-      "Read(./**/settings.local.json)",
+      "Read(~/.claude/.credentials.json)",
+      "Read(~/.ssh/id_*)",
+      "Read(~/.env)",
       "Read(./**/.env)",
-      "Bash(rm -rf /*)",
+      "Bash(rm * /)",
       "Bash(rm -rf ~*)",
       "Bash(rm -rf $HOME*)",
       "Bash(git push --force*)",
@@ -156,6 +157,17 @@
   },
   "model": "opus",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/awk-guard.py"
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "hooks": [
@@ -173,7 +185,7 @@
   "enableWorkflows": true,
   "statusLine": {
     "type": "command",
-    "command": "/home/wma/.claude/statusline-command.sh"
+    "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "claude-md-management@claude-plugins-official": true,
@@ -186,7 +198,7 @@
     "feature-dev@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
+    "github@claude-plugins-official": false,
     "security-guidance@claude-plugins-official": true
   },
   "effortLevel": "xhigh",

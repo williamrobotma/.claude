@@ -21,6 +21,8 @@ machine-independent config and ignores everything else.
     !LICENSE
     !sync.sh
     !statusline-command.sh
+    !hooks/
+    !hooks/*.py
     !commands/
     !commands/sync-push.md
     !skills/
@@ -40,6 +42,7 @@ Tracked:
 - `.gitignore` - the allowlist itself
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
 - `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
+- `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
 - `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
 - `README.md`, `LICENSE`
