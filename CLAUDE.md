@@ -73,6 +73,7 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 - Least complex solution that works; simple, explicit control flow over layered machinery.
 - No speculative guards, validation, or branching; add only for real invariants or actual failures.
 - Fail-visible over silent-skip: a guard that quietly returns on unexpected-empty/degenerate input hides bugs. Let it surface (blank output, error) unless that state is known and benign.
+- `assert` only for internal invariants/self-checks (stripped by `python -O`); validate external input / runtime conditions with real exceptions - prefer `try/except` around the failing op, else an explicit `raise` (e.g. `ValueError`) when there's no operation to wrap. (Google Python style guide)
 - Prefer the clearest standard construct over clever convenience helpers or hand-rolled machinery when both do the same job. Use `==` over `.equals()` or `.eq()`, use for loops and comprehensions over `map` and `filter`, use slicing and built-ins like `zip`, `enumerate`, `sorted`, `reversed`, `any`, `all`, `sum`, `min`, `max`, `len`, etc. over custom helpers that do the same thing.
 - joblib.Parallel job wrapper functions must be <=3 lines (name, call, return). If longer, restructure the called function instead.
 - Avoid unnecessary:
