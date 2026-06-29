@@ -169,7 +169,6 @@
     "github@claude-plugins-official": false,
     "hookify@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
-    "security-guidance@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "consensus@life-sciences": true,
     "pubmed@life-sciences": true,
