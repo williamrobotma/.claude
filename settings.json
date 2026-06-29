@@ -217,6 +217,7 @@
       }
     }
   },
+  "skillListingBudgetFraction": 0.015,
   "effortLevel": "xhigh",
   "advisorModel": "opus",
   "tui": "default",
