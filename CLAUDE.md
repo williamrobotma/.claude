@@ -52,6 +52,9 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 ## Shell Discipline
 - Prefer workspace-relative paths; use absolute only when a tool requires it.
 - Use bare binary names (ruff, pylint, etc.); rely on PATH or the active venv.
+- Never `awk`/`gawk`/`mawk` (a PreToolUse hook denies it, so reaching for it wastes a
+  turn). Field/column extraction from command output -> `cut`/`grep`/`sort`/`sed`; file
+  contents -> Read. awk's `system()`/`getline` bypass the Read deny-rules.
 - No foreground `sleep`; the harness blocks it (exit ~144) and aborts your script mid-run.
   Poll with a background command or the Monitor tool.
 - Kill by PGID, not `pkill -f <pattern>`: if the pattern appears in your own command line,

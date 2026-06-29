@@ -37,7 +37,12 @@ def stage_commands(command):
     return cmds
 
 
-command = (json.load(sys.stdin).get("tool_input") or {}).get("command", "")
+try:
+    data = json.load(sys.stdin)
+except (json.JSONDecodeError, ValueError):
+    sys.exit(0)  # unreadable input -> fall through to normal permission flow
+
+command = (data.get("tool_input") or {}).get("command", "")
 try:
     uses_awk = any(c in ("awk", "gawk", "mawk") for c in stage_commands(command))
 except ValueError:
