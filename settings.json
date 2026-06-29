@@ -199,7 +199,6 @@
     "security-guidance@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
-    "biorxiv@life-sciences": true,
     "consensus@life-sciences": true,
     "pubmed@life-sciences": true,
     "scvi-tools@life-sciences": true,
