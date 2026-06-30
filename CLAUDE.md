@@ -9,7 +9,7 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Ask for clarification when ambiguous; never guess.
 - "Over-engineered" applies to behavior too: if it needs layered rules to explain, simplify the behavior first.
 - Don't add filtering, sanitizing, or pruning unless asked or clearly required for correctness.
-- **Research before building.** Verify from current docs, not memory (training lags fast-moving tools) that the need isn't already met before adding code or steps.
+- **Research before building, recommending, or diagnosing.** Training is months-to-years behind current state; treat every claim about a third-party library, package, framework, CLI, API, or service as suspect until verified against current docs/issues/release notes. Search the web (and recursively follow the relevant links - one page rarely suffices) every time you install, configure, recommend, or debug one. Memory of how a library worked in training is a starting hypothesis, never the answer. This is non-negotiable even when the task "looks simple" or you "already know" - the first thing that goes stale is exactly the obvious-looking common case.
 - **Prefer an existing solution over a custom one.** When something is needed, find it before building it, in order:
   - Already in the codebase? Reuse it; don't rewrite.
   - In the stdlib? Use it.
