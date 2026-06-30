@@ -239,6 +239,5 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "model": "claude-opus-4-7"
+  "agentPushNotifEnabled": true
 }
