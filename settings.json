@@ -25,7 +25,6 @@
       "mcp__claude_ai_alphaXiv__discover_papers",
       "mcp__claude_ai_bioRxiv__get_preprint",
       "mcp__claude_ai_bioRxiv__get_categories",
-      "mcp__claude_ai_PubMed__search_articles",
       "Bash(conda env list)",
       "Bash(conda activate *)",
       "Bash(mamba activate *)",
@@ -89,6 +88,7 @@
       "Bash(make --question *)",
       "Bash(git diff *)",
       "Bash(git log *)",
+      "Bash(git status *)",
       "Bash(git rev-list *)",
       "Bash(git -C * diff *)",
       "Bash(git -C * log *)",
@@ -199,20 +199,20 @@
     "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
+    "context7@claude-plugins-official": false,
+    "feature-dev@claude-plugins-official": false,
     "github@claude-plugins-official": false,
     "hookify@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "consensus@life-sciences": true,
-    "pubmed@life-sciences": true,
-    "scvi-tools@life-sciences": true,
-    "single-cell-rna-qc@life-sciences": true
+    "superpowers@claude-plugins-official": false,
+    "consensus@life-sciences": false,
+    "pubmed@life-sciences": false,
+    "scvi-tools@life-sciences": false,
+    "single-cell-rna-qc@life-sciences": false
   },
   "extraKnownMarketplaces": {
     "life-sciences": {
