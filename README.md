@@ -3,6 +3,9 @@
 Version-controlled subset of `~/.claude` (Claude Code global config), synced across
 machines via a private GitHub repo.
 
+Reference: the official `~/.claude` directory docs (what each file/dir is, load order,
+settings schema) - https://code.claude.com/docs/en/claude-directory
+
 ## What this is
 
 `~/.claude` holds both durable config and a large amount of per-machine, fast-churning
