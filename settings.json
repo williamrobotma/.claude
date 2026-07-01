@@ -167,6 +167,7 @@
       "/tmp"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -203,7 +204,7 @@
     "claude-md-management@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "context7@claude-plugins-official": false,
+    "context7@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": false,
     "github@claude-plugins-official": false,
     "hookify@claude-plugins-official": true,
@@ -239,6 +240,5 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "model": "opus"
+  "agentPushNotifEnabled": true
 }
