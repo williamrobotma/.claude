@@ -9,7 +9,7 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Ask for clarification when ambiguous; never guess.
 - "Over-engineered" applies to behavior too: if it needs layered rules to explain, simplify the behavior first.
 - Don't add filtering, sanitizing, or pruning unless asked or clearly required for correctness.
-- **Research before building.** Verify from current docs, not memory (training lags fast-moving tools) that the need isn't already met before adding code or steps.
+- **Research before building, recommending, or diagnosing.** Training lags; memory of any third-party library/CLI/API/service is a hypothesis, never the answer. Search current docs/issues/release notes and recursively follow links until you actually have the fact - applies even when the case "looks simple" (that's the first thing to go stale).
 - **Prefer an existing solution over a custom one.** When something is needed, find it before building it, in order:
   - Already in the codebase? Reuse it; don't rewrite.
   - In the stdlib? Use it.
@@ -26,6 +26,11 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - When offering fix options, surface trade-offs proactively: rough diff size, user-facing impact (does it need a new flag? command change?), brittleness; and if one option matches a prior rejected attempt, name it and say what was wrong. Don't make the user fish for this.
 
 ## Diagnosis & Honesty
+- **A summary is a lead, not a finding.** Subagent reports, web-search snippets, doc claims, prior session_summary notes - all are pointers to look, never the answer itself. Before any recommendation, list the load-bearing facts and verify each one directly (read the diff, hit the API, `cat` the config, observe the live state). The structured-looking output of a search/fork tempts you to skip this; don't.
+- **N=1 is a lead, not a finding.** One crash, one passing test, one timed run is a hypothesis. Don't call it "proof" or "confirms" without repetition + a control + ruling out alternatives. The right next action on a single data point is the reproduction, not the synthesis.
+- **A correction means nearby assumptions are also suspect.** When the user catches one wrong claim in a chain, audit the rest of the chain before re-synthesizing - the same mechanism produced the others.
+- **GitHub state needs the API, not WebFetch.** Issue/PR pages render headers; the comment thread, `state_reason`, `closed_by`, and timeline live in `api.github.com`. `stale` label != stale-abandoned. PR titles describe intent; only the diff describes behavior.
+- **Doc-state != live-state.** Any claim of the form "production currently does X" or "the config says Y" gets a `systemctl show` / `cat` / `ps` check before reasoning on it.
 - Look before explaining. On "what's going on" or any surprise, read the primary artifact (log, transcript, output, the file) before naming a cause - inference from priors is not diagnosis. Never present a guess as one (mark "guessing" vs "the log shows"); "still running / standing by / I'll proceed" is not an answer.
 - Observe before intervening. Don't kill, restart, or modify what you're diagnosing before reading its state; intervention destroys the evidence.
 - Verify cheap-to-check limits before obeying: a file's actual size vs a generic "will overflow context" warning. Not license to bypass real constraints (key/.env deny-rules, "don't edit running files", safety gates).
