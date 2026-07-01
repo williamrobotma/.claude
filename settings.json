@@ -167,6 +167,7 @@
       "/tmp"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -228,7 +229,7 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "medium",
   "advisorModel": "opus",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
