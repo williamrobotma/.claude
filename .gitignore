@@ -13,3 +13,6 @@
 !skills/
 !skills/**/
 !skills/**/*.md
+!rules/
+!rules/**/
+!rules/**/*.md

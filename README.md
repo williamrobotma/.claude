@@ -31,12 +31,17 @@ machine-independent config and ignores everything else.
     !skills/
     !skills/**/
     !skills/**/*.md
+    !rules/
+    !rules/**/
+    !rules/**/*.md
 
-`skills/` admits only `*.md`: the gate stays deny-by-default even inside it, so a
-non-md file an agent drops there (a token, a cache) is ignored, not auto-tracked.
-This is deliberate. The directory contains secrets and volatile state, so the safe
-default is "track nothing unless explicitly allowed." Never invert this to a denylist:
-one forgotten entry leaks a credential.
+`skills/` and `rules/` admit only `*.md`: the gate stays deny-by-default even inside
+them, so a non-md file an agent drops there (a token, a cache) is ignored, not
+auto-tracked. This is deliberate. These directories can accumulate secrets and
+volatile state, so the safe default is "track nothing unless explicitly allowed."
+Never invert this to a denylist: one forgotten entry leaks a credential - this
+also means individual rule/skill files are never named in `.gitignore`; the
+extension gate sweeps them in or out uniformly.
 
 Tracked:
 
@@ -48,18 +53,42 @@ Tracked:
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
 - `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
+- `rules/**/*.md` - `.claude/rules/` instructions, global scope, optionally
+  path-gated per file (markdown only; gate stays deny-by-default)
 - `README.md`, `LICENSE`
 
 Deliberately NOT tracked (and why):
 
 - `.credentials.json` - live auth tokens; never commit
 - `settings.local.json` - per-machine setting overrides
+- `CLAUDE.local.md` - machine-local instructions; see "Machine-local instructions" below
 - `history.jsonl`, `sessions/`, `projects/`, `file-history/`, `shell-snapshots/`,
   `session-env/` - per-machine session state; append-only, conflict-prone
 - `daemon.*`, `*.lock`, `*-status.json` - live process state; harmful to share
 - `cache/`, `paste-cache/`, `backups/`, `*-cache.json` - regenerable caches
 - `plugins/` - per-machine install state (abs paths, version SHAs, catalog cache);
   your enabled set lives in `settings.json` `enabledPlugins`
+
+## Machine-local instructions
+
+For a Claude Code instruction that must never sync to another machine at all - not
+even as an inert, harmless reference in a tracked file - use `~/.claude/CLAUDE.local.md`,
+never `rules/` or `settings.json`.
+
+`~/.claude/CLAUDE.md` is special-cased by Claude Code to load in every session
+regardless of working directory (that's what makes it "global"). `CLAUDE.local.md`
+is NOT part of that special case - it only loads via the ordinary directory-walk-up-
+from-cwd mechanism, so `~/.claude/CLAUDE.local.md` only takes effect in a session
+whose cwd is actually inside `~/.claude`. It requires no `.gitignore` line (the root
+`*` already covers it) and no reference anywhere - Claude Code discovers it on its
+own by walking the directory tree, so nothing about it ever appears in a tracked
+file on any other machine.
+
+Anything placed in `rules/`, `hooks/`, or `settings.json` - tracked or not - is
+either present on every machine (if tracked) or requires a reference/registration
+somewhere that IS tracked to ever fire (if not) - there is no way to make those
+mechanisms auto-load without a tracked footprint. `CLAUDE.local.md` is the only
+global-scope file with a genuinely zero-footprint local mechanism.
 
 ## Adding a new tracked file
 
