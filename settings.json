@@ -167,7 +167,6 @@
       "/tmp"
     ]
   },
-  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
