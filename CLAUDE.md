@@ -73,6 +73,7 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 - GitHub operations: use git over SSH; reach for `gh` only when there's no git/SSH alternative. PRs (which git can't create) go through the browser compare URL: `https://github.com/<owner>/<repo>/compare/<base>...<head>`.
 - Durable guidance/preferences/rules live in git-tracked files (here, or a tracked project CLAUDE.md/doc) - never in the gitignored auto-memory under `~/.claude/projects/*/memory/`, which doesn't sync across machines.
 - Worktree merges: before creating a worktree to do a merge, check `git status -sb` on the main checkout for `[ahead N]`. If there are unpushed commits, push them first; never cherry-pick them on afterward (creates diverged history requiring `git reset --hard` to clean up).
+- Session handoff / resume-point (always): any multi-step task maintains a resume-point in a git-tracked doc (the design/spec/plan, or a short "Current status" section): current stage, what's done, the exact next action, and inputs still needed - so a fresh session can continue without the chat history. Update it as state changes; leave work committed and pushed at stopping points (tree clean, local == remote).
 
 ---
 
