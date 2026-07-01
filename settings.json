@@ -167,6 +167,7 @@
       "/tmp"
     ]
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
