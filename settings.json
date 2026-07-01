@@ -25,7 +25,6 @@
       "mcp__claude_ai_alphaXiv__discover_papers",
       "mcp__claude_ai_bioRxiv__get_preprint",
       "mcp__claude_ai_bioRxiv__get_categories",
-      "mcp__claude_ai_PubMed__search_articles",
       "Bash(conda env list)",
       "Bash(conda activate *)",
       "Bash(mamba activate *)",
@@ -89,6 +88,7 @@
       "Bash(make --question *)",
       "Bash(git diff *)",
       "Bash(git log *)",
+      "Bash(git status *)",
       "Bash(git rev-list *)",
       "Bash(git -C * diff *)",
       "Bash(git -C * log *)",
@@ -240,5 +240,6 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "model": "opus"
 }
