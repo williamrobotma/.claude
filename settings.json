@@ -174,7 +174,7 @@
       "/tmp"
     ]
   },
-  "model": "qwen3.6-35b-a3b-mtp-coding-ud-q5-k-xl",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
