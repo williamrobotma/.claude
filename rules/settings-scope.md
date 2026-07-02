@@ -16,13 +16,13 @@ at the user level.
 - A file at `~/.claude/settings.local.json` is never read by Claude Code. If
   one exists, migrate any real content (e.g. permissions) into `settings.json`
   and delete it.
-- A per-machine override exists (`ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` in
-  that machine's own shell profile, e.g. `~/.bashrc`, outside this repo) but it is
-  NOT a clean substitute for a local settings file: per the official docs
-  (https://code.claude.com/docs/en/model-config#adjust-effort-level), "the
-  environment variable takes precedence over all other methods" - i.e. it beats
-  `/effort`/`/model` too, not just the `settings.json` default, so `/effort`
-  becomes inert for the rest of any session on that machine. Reserve this for a
-  machine that should never interactively change effort/model; otherwise just
-  accept one shared value in `settings.json` (edit it directly if `/effort`'s
-  "save as default" would conflict with another machine's choice).
+- model/effort values used to collide on every sync. Fix: `.gitattributes` routes
+  settings.json through `merge-settings.py` (a merge driver registered in
+  `sync.sh`). If the only keys that differ are `model`/`effortLevel` it keeps this
+  machine's copy; if anything else differs it falls back to git's normal merge, so
+  a real change (a permission, a plugin) still surfaces as a visible conflict and
+  is never silently dropped. Net: model/effort are effectively per-machine and
+  `/model`/`/effort` keep working everywhere.
+- Not used: the `ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` env vars would also
+  pin model/effort per-machine, but per the docs they beat interactive
+  `/model`/`/effort` too, making those commands inert - the merge driver does not.

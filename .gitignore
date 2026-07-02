@@ -2,9 +2,11 @@
 !CLAUDE.md
 !settings.json
 !.gitignore
+!.gitattributes
 !README.md
 !LICENSE
 !sync.sh
+!merge-settings.py
 !statusline-command.sh
 !hooks/
 !hooks/*.py

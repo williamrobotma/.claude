@@ -1,0 +1,3 @@
+# settings.json is merged by merge-settings.py (driver registered in sync.sh):
+# keeps this machine's model/effortLevel, else falls back to a normal conflict.
+settings.json merge=claude-settings

@@ -20,9 +20,11 @@ machine-independent config and ignores everything else.
     !CLAUDE.md
     !settings.json
     !.gitignore
+    !.gitattributes
     !README.md
     !LICENSE
     !sync.sh
+    !merge-settings.py
     !statusline-command.sh
     !hooks/
     !hooks/*.py
@@ -48,7 +50,9 @@ Tracked:
 - `CLAUDE.md` - global preferences / instructions
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
+- `.gitattributes` - routes settings.json through the `merge-settings.py` driver
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
+- `merge-settings.py` - settings.json merge driver (see "Handling mismatches")
 - `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
@@ -113,19 +117,14 @@ Typical session:
 
 ## Handling mismatches / conflicts
 
-`settings.json` is the main conflict risk because Claude Code rewrites it on each
-machine - notably `/model` and `/effort` "save as default" write straight to it.
-There is no unsynced user-level settings file to push machine-specific keys into
-(see `rules/settings-scope.md`). The default fix is simplest: accept one shared
-value for the key in `settings.json` (edit it directly if `/effort`'s "save as
-default" picked something you don't want as the shared baseline).
-
-A per-machine env var override (`ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` in
-that machine's own shell profile, outside this repo) exists but has a real cost:
-per the docs, the env var "takes precedence over all other methods," including
-`/model`/`/effort` run interactively - so it makes those commands inert for the
-rest of any session on that machine. Only reach for it on a machine that should
-never change effort/model interactively; see `rules/settings-scope.md` for detail.
+`settings.json` is rewritten per machine (notably `/model` and `/effort` "save as
+default"), so two machines editing it between syncs used to conflict. Fix:
+`.gitattributes` routes it through `merge-settings.py`, a merge driver registered
+by `sync.sh`. When the only keys that differ are `model`/`effortLevel` it keeps
+this machine's copy; otherwise it falls back to git's normal merge, so any real
+change still surfaces as a visible conflict rather than being silently dropped.
+Model/effort thus stay per-machine and `/model`/`/effort` keep working everywhere.
+See `rules/settings-scope.md`.
 
 A merge pull reconciles a divergent remote on its own; it only stops if the same
 lines clash, leaving conflict markers in the small file(s):
