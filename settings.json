@@ -228,7 +228,7 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "medium",
   "advisorModel": "opus",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
