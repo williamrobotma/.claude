@@ -3,6 +3,9 @@
 Version-controlled subset of `~/.claude` (Claude Code global config), synced across
 machines via a private GitHub repo.
 
+Reference: the official `~/.claude` directory docs (what each file/dir is, load order,
+settings schema) - https://code.claude.com/docs/en/claude-directory
+
 ## What this is
 
 `~/.claude` holds both durable config and a large amount of per-machine, fast-churning
@@ -28,12 +31,17 @@ machine-independent config and ignores everything else.
     !skills/
     !skills/**/
     !skills/**/*.md
+    !rules/
+    !rules/**/
+    !rules/**/*.md
 
-`skills/` admits only `*.md`: the gate stays deny-by-default even inside it, so a
-non-md file an agent drops there (a token, a cache) is ignored, not auto-tracked.
-This is deliberate. The directory contains secrets and volatile state, so the safe
-default is "track nothing unless explicitly allowed." Never invert this to a denylist:
-one forgotten entry leaks a credential.
+`skills/` and `rules/` admit only `*.md`: the gate stays deny-by-default even inside
+them, so a non-md file an agent drops there (a token, a cache) is ignored, not
+auto-tracked. This is deliberate. These directories can accumulate secrets and
+volatile state, so the safe default is "track nothing unless explicitly allowed."
+Never invert this to a denylist: one forgotten entry leaks a credential - this
+also means individual rule/skill files are never named in `.gitignore`; the
+extension gate sweeps them in or out uniformly.
 
 Tracked:
 
@@ -45,18 +53,41 @@ Tracked:
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
 - `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
+- `rules/**/*.md` - `.claude/rules/` instructions, global scope, optionally
+  path-gated per file (markdown only; gate stays deny-by-default)
 - `README.md`, `LICENSE`
 
 Deliberately NOT tracked (and why):
 
 - `.credentials.json` - live auth tokens; never commit
-- `settings.local.json` - per-machine setting overrides
+- `CLAUDE.local.md` - machine-local instructions; see "Machine-local instructions" below
 - `history.jsonl`, `sessions/`, `projects/`, `file-history/`, `shell-snapshots/`,
   `session-env/` - per-machine session state; append-only, conflict-prone
 - `daemon.*`, `*.lock`, `*-status.json` - live process state; harmful to share
 - `cache/`, `paste-cache/`, `backups/`, `*-cache.json` - regenerable caches
 - `plugins/` - per-machine install state (abs paths, version SHAs, catalog cache);
   your enabled set lives in `settings.json` `enabledPlugins`
+
+## Machine-local instructions
+
+For a Claude Code instruction that must never sync to another machine at all - not
+even as an inert, harmless reference in a tracked file - use `~/.claude/CLAUDE.local.md`,
+never `rules/` or `settings.json`.
+
+`~/.claude/CLAUDE.md` is special-cased by Claude Code to load in every session
+regardless of working directory (that's what makes it "global"). `CLAUDE.local.md`
+is NOT part of that special case - it only loads via the ordinary directory-walk-up-
+from-cwd mechanism, so `~/.claude/CLAUDE.local.md` only takes effect in a session
+whose cwd is actually inside `~/.claude`. It requires no `.gitignore` line (the root
+`*` already covers it) and no reference anywhere - Claude Code discovers it on its
+own by walking the directory tree, so nothing about it ever appears in a tracked
+file on any other machine.
+
+Anything placed in `rules/`, `hooks/`, or `settings.json` - tracked or not - is
+either present on every machine (if tracked) or requires a reference/registration
+somewhere that IS tracked to ever fire (if not) - there is no way to make those
+mechanisms auto-load without a tracked footprint. `CLAUDE.local.md` is the only
+global-scope file with a genuinely zero-footprint local mechanism.
 
 ## Adding a new tracked file
 
@@ -83,8 +114,18 @@ Typical session:
 ## Handling mismatches / conflicts
 
 `settings.json` is the main conflict risk because Claude Code rewrites it on each
-machine. To minimize churn, push machine-specific keys into `settings.local.json`
-(untracked) and keep `settings.json` to the shared baseline.
+machine - notably `/model` and `/effort` "save as default" write straight to it.
+There is no unsynced user-level settings file to push machine-specific keys into
+(see `rules/settings-scope.md`). The default fix is simplest: accept one shared
+value for the key in `settings.json` (edit it directly if `/effort`'s "save as
+default" picked something you don't want as the shared baseline).
+
+A per-machine env var override (`ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` in
+that machine's own shell profile, outside this repo) exists but has a real cost:
+per the docs, the env var "takes precedence over all other methods," including
+`/model`/`/effort` run interactively - so it makes those commands inert for the
+rest of any session on that machine. Only reach for it on a machine that should
+never change effort/model interactively; see `rules/settings-scope.md` for detail.
 
 A merge pull reconciles a divergent remote on its own; it only stops if the same
 lines clash, leaving conflict markers in the small file(s):

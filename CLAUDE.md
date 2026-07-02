@@ -35,6 +35,8 @@ Solo researcher; personal experimentation only. No enterprise/production complex
 - Observe before intervening. Don't kill, restart, or modify what you're diagnosing before reading its state; intervention destroys the evidence.
 - Verify cheap-to-check limits before obeying: a file's actual size vs a generic "will overflow context" warning. Not license to bypass real constraints (key/.env deny-rules, "don't edit running files", safety gates).
 - Async work: read state from its artifact, don't infer from silence. An in-flight call past ~60-90s is likely hung - inspect, then kill+restart to unblock. Don't fan out many parallel net/tool calls across concurrent agents; a shared limiter stalls them all.
+- **Repeated correction on the same point means STOP proposing, not propose faster.** If the user corrects the same thing 2-3+ times, the bug isn't the latest fact - it's the process: pattern-matching each correction onto the most recently read fragment, then re-asserting with full confidence. When this happens: stop proposing solutions, write out every constraint the user has stated so far verbatim, and check candidates against ALL of them at once before speaking again. A wrong answer delivered confidently costs more of the user's trust than admitting "I don't see it, point me at it directly."
+- **A fetched/summarized doc is a lead, not the doc.** `WebFetch` runs the page through a small model before you see it; a `grep`/keyword search over that output inherits whatever the summarizer dropped or reframed. After 2+ wrong conclusions from the same source, stop re-prompting the same tool differently - pull the raw source directly (`curl`) and diff, or read the saved raw output end-to-end once, rather than re-summarizing.
 
 ## Writing (comments, docstrings, commit messages, chat)
 - ASCII only (standard ANSI keyboard). No Unicode symbols: `->` not the arrow glyph,
@@ -71,6 +73,7 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 - GitHub operations: use git over SSH; reach for `gh` only when there's no git/SSH alternative. PRs (which git can't create) go through the browser compare URL: `https://github.com/<owner>/<repo>/compare/<base>...<head>`.
 - Durable guidance/preferences/rules live in git-tracked files (here, or a tracked project CLAUDE.md/doc) - never in the gitignored auto-memory under `~/.claude/projects/*/memory/`, which doesn't sync across machines.
 - Worktree merges: before creating a worktree to do a merge, check `git status -sb` on the main checkout for `[ahead N]`. If there are unpushed commits, push them first; never cherry-pick them on afterward (creates diverged history requiring `git reset --hard` to clean up).
+- Session handoff / resume-point (always): any multi-step task maintains a resume-point in a git-tracked doc (the design/spec/plan, or a short "Current status" section): current stage, what's done, the exact next action, and inputs still needed - so a fresh session can continue without the chat history. Update it as state changes; leave work committed and pushed at stopping points (tree clean, local == remote).
 
 ---
 
