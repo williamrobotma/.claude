@@ -20,9 +20,11 @@ machine-independent config and ignores everything else.
     !CLAUDE.md
     !settings.json
     !.gitignore
+    !.gitattributes
     !README.md
     !LICENSE
     !sync.sh
+    !merge-settings.py
     !statusline-command.sh
     !hooks/
     !hooks/*.py
@@ -48,7 +50,9 @@ Tracked:
 - `CLAUDE.md` - global preferences / instructions
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
+- `.gitattributes` - routes settings.json through the `merge-settings.py` driver
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
+- `merge-settings.py` - settings.json merge driver (see "Handling mismatches")
 - `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command (gated push)
@@ -60,7 +64,6 @@ Tracked:
 Deliberately NOT tracked (and why):
 
 - `.credentials.json` - live auth tokens; never commit
-- `settings.local.json` - per-machine setting overrides
 - `CLAUDE.local.md` - machine-local instructions; see "Machine-local instructions" below
 - `history.jsonl`, `sessions/`, `projects/`, `file-history/`, `shell-snapshots/`,
   `session-env/` - per-machine session state; append-only, conflict-prone
@@ -114,9 +117,14 @@ Typical session:
 
 ## Handling mismatches / conflicts
 
-`settings.json` is the main conflict risk because Claude Code rewrites it on each
-machine. To minimize churn, push machine-specific keys into `settings.local.json`
-(untracked) and keep `settings.json` to the shared baseline.
+`settings.json` is rewritten per machine (notably `/model` and `/effort` "save as
+default"), so two machines editing it between syncs used to conflict. Fix:
+`.gitattributes` routes it through `merge-settings.py`, a merge driver registered
+by `sync.sh`. When the only keys that differ are `model`/`effortLevel` it keeps
+this machine's copy; otherwise it falls back to git's normal merge, so any real
+change still surfaces as a visible conflict rather than being silently dropped.
+Model/effort thus stay per-machine and `/model`/`/effort` keep working everywhere.
+See `rules/settings-scope.md`.
 
 A merge pull reconciles a divergent remote on its own; it only stops if the same
 lines clash, leaving conflict markers in the small file(s):

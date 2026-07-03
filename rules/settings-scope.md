@@ -11,8 +11,18 @@ Claude Code's "Local" settings scope is `.claude/settings.local.json` inside a
 at the user level.
 
 - `/model` and `/effort` "save as default" always write to the tracked, synced
-  `~/.claude/settings.json` - there is no native way to keep a model/effort
-  choice unsynced per machine.
+  `~/.claude/settings.json` - there is no unsynced *file* to keep a model/effort
+  choice per machine.
 - A file at `~/.claude/settings.local.json` is never read by Claude Code. If
   one exists, migrate any real content (e.g. permissions) into `settings.json`
   and delete it.
+- model/effort values used to collide on every sync. Fix: `.gitattributes` routes
+  settings.json through `merge-settings.py` (a merge driver registered in
+  `sync.sh`). If the only keys that differ are `model`/`effortLevel` it keeps this
+  machine's copy; if anything else differs it falls back to git's normal merge, so
+  a real change (a permission, a plugin) still surfaces as a visible conflict and
+  is never silently dropped. Net: model/effort are effectively per-machine and
+  `/model`/`/effort` keep working everywhere.
+- Not used: the `ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` env vars would also
+  pin model/effort per-machine, but per the docs they beat interactive
+  `/model`/`/effort` too, making those commands inert - the merge driver does not.

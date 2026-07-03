@@ -23,6 +23,10 @@ note() { echo "$(date '+%F %T') $*" >>"$log"; }
 # pull/push can reach the agent. The agent + key load are managed by ~/.bashrc.
 export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-$HOME/.ssh/agent.sock}"
 
+# Register the settings.json merge driver named in .gitattributes. The name->command
+# map lives in per-clone git config, not the repo, so (re)set it here; idempotent.
+git config merge.claude-settings.driver 'python3 "$HOME/.claude/merge-settings.py" %O %A %B'
+
 case "${1:-}" in
   pull)
     git pull --no-rebase --no-edit --quiet 2>>"$log" \
