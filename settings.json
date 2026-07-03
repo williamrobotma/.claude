@@ -174,7 +174,7 @@
       "/tmp"
     ]
   },
-  "model": "qwen3.6-35b-a3b-mtp-coding-ud-q5-k-xl",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -207,7 +207,7 @@
     "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": false,
+    "claude-code-setup@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
@@ -220,7 +220,8 @@
     "consensus@life-sciences": false,
     "pubmed@life-sciences": false,
     "scvi-tools@life-sciences": false,
-    "single-cell-rna-qc@life-sciences": false
+    "single-cell-rna-qc@life-sciences": false,
+    "skill-creator@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "life-sciences": {
@@ -236,13 +237,13 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "xhigh",
   "advisorModel": "opus",
-  "tui": "default",
+  "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
-  "verbose": false,
+  "verbose": true,
   "autoCompactEnabled": true,
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
