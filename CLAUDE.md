@@ -48,6 +48,11 @@ Solo researcher; personal experimentation only. No enterprise/production complex
   shape, example, citation (turn prose into bullets/fields; don't abbreviate domain
   terms - `cell_line`, not `line`), but don't cram ideas onto one line to save
   lines; separate them with newlines and sub-bullets.
+- Markdown formatting (distinct from Python; never hard-wrap it):
+  - one logical line per bullet; let it soft-wrap
+  - one idea per bullet; no cramming
+  - short bullets; nest sub-bullets to organize
+  - Python code rules (80-col wrap, "avoid nesting") do NOT transfer to markdown
 - Rewriting existing text: preserve its information exactly; flag anything added or dropped.
 - Chat: answer first, bullets/tables over paragraphs, no preamble/recap/filler.
 
