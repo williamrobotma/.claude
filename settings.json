@@ -174,7 +174,6 @@
       "/tmp"
     ]
   },
-  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -238,7 +237,7 @@
   },
   "effortLevel": "xhigh",
   "advisorModel": "fable",
-  "tui": "default",
+  "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
@@ -247,5 +246,6 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "model": "opus"
 }
