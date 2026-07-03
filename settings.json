@@ -174,7 +174,7 @@
       "/tmp"
     ]
   },
-  "model": "opus",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -237,7 +237,7 @@
     }
   },
   "effortLevel": "xhigh",
-  "advisorModel": "opus",
+  "advisorModel": "fable",
   "tui": "default",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
