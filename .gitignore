@@ -12,6 +12,9 @@
 !hooks/*.py
 !commands/
 !commands/sync-push.md
+!commands/sync-push-bg.md
+!agents/
+!agents/*.md
 !skills/
 !skills/**/
 !skills/**/*.md

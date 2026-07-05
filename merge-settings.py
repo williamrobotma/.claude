@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """settings.json merge driver: if the only keys that differ are per-machine
-(model, effortLevel), keep ours; otherwise fall back to git's normal 3-way
-merge. Registered per-clone by sync.sh. Called as: merge-settings.py %O %A %B.
+preferences, keep ours; otherwise fall back to git's normal 3-way merge (which
+unions shared additions like permissions line-by-line). Registered per-clone by
+sync.sh. Called as: merge-settings.py %O %A %B.
 """
 
 import json
 import subprocess
 import sys
 
-PER_MACHINE = {"model", "effortLevel"}
+# Per-machine preferences: kept as this clone's value, never merged. Everything
+# else (permissions, plugins, hooks, env, ...) falls through to a normal merge.
+PER_MACHINE = {
+    "model",
+    "effortLevel",
+    "tui",
+    "advisorModel",
+    "askUserQuestionTimeout",
+    "theme",
+    "verbose",
+}
 
 
 def load(path):
