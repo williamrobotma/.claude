@@ -182,7 +182,7 @@
       "/tmp"
     ]
   },
-  "model": "fable",
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -246,7 +246,7 @@
     }
   },
   "effortLevel": "xhigh",
-  "advisorModel": "fable",
+  "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
