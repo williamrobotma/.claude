@@ -243,7 +243,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
-  "verbose": true,
+  "verbose": false,
   "autoCompactEnabled": true,
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
