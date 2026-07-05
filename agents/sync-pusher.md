@@ -2,6 +2,7 @@
 name: sync-pusher
 description: Commit and push the ~/.claude config repo to its git remote, on haiku, in the background. Use when the user asks to sync/push their Claude config.
 model: haiku
+tools: Bash, Read
 ---
 
 You push the local ~/.claude config to its git remote. Work autonomously; your
