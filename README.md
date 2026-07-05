@@ -55,7 +55,8 @@ Tracked:
 - `merge-settings.py` - settings.json merge driver (see "Handling mismatches")
 - `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
-- `commands/sync-push.md` - the `/sync-push` slash command (gated push)
+- `commands/sync-push.md` - the `/sync-push` slash command; delegates the gated push to the `sync-pusher` agent
+- `agents/*.md` - subagents (e.g. `sync-pusher`: runs the push on haiku, off the main context)
 - `skills/**/*.md` - personal skills (markdown only; gate stays deny-by-default)
 - `rules/**/*.md` - `.claude/rules/` instructions, global scope, optionally
   path-gated per file (markdown only; gate stays deny-by-default)
