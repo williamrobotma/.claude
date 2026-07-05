@@ -7,7 +7,13 @@ Push the local ~/.claude config to its git remote.
 2. Run `bash ~/.claude/sync.sh push` (it merges in the remote, then pushes).
 3. Show the last few lines of `~/.claude/sync.log` so I can see the result.
 
-If the push did not succeed, read the git error in the log:
-- "Permission denied (publickey)" or a network error -> an auth/connectivity issue
-  (e.g. the SSH key is not unlocked into the agent); fix access and retry, no merge needed.
-- merge conflict -> the merge is in progress with conflict markers. settings.json is auto-resolved by the merge-settings.py driver (per-machine prefs kept local, everything else merged), so a conflict THERE means a driver gap - a per-machine pref missing from its PER_MACHINE set; fix the set rather than hand-editing. Other files (CLAUDE.md etc.) are plain text merges - help me resolve, then `git -C ~/.claude add <file>` and `git -C ~/.claude commit`, and run the push again.
+If the push did not succeed, read the git error in the log and handle it by type.
+
+Auth / network ("Permission denied (publickey)", timeouts):
+- Cause: SSH key not loaded into the agent, or no connectivity.
+- Action: fix access and retry. No merge needed.
+
+Merge conflict (markers left in the working tree):
+- settings.json is auto-resolved by the merge-settings.py driver (per-machine prefs kept local, all else merged). A conflict THERE means a driver gap - a per-machine pref missing from PER_MACHINE; fix the set, not the file.
+- Other files (CLAUDE.md etc.) are plain text merges - help me resolve them.
+- Then `git -C ~/.claude add <file>`, `git -C ~/.claude commit`, and push again.

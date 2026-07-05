@@ -16,9 +16,15 @@ Steps:
 2. Run `bash ~/.claude/sync.sh push` (it merges in the remote, then pushes).
 3. Read the last few lines of `~/.claude/sync.log`.
 
-If the push did not succeed, read the git error in the log:
-- "Permission denied (publickey)" / network error -> auth or connectivity issue
-  (e.g. SSH key not unlocked into the agent). Report it; do not retry blindly.
-- merge conflict -> settings.json is auto-resolved by the merge-settings.py driver (per-machine prefs kept local, everything else merged), so a conflict here means the driver did NOT cover it. Do NOT hand-resolve: STOP and report the conflicting file and hunk verbatim so the user can fix the driver or the file.
+If the push fails, read the git error in the log and handle it by type.
+
+Auth / network (`Permission denied (publickey)`, timeouts):
+- Cause: SSH key not loaded into the agent, or no connectivity.
+- Action: report it; do not retry blindly.
+
+Merge conflict:
+- settings.json should never reach you as a conflict: the merge-settings.py driver auto-resolves it (per-machine prefs kept local, all else merged).
+- A conflict there means a gap in the driver's PER_MACHINE set.
+- Action: do NOT hand-resolve. Stop and report the file + hunk verbatim for the user to fix.
 
 Report: pushed ok, or N commits still pending, or the exact error.
