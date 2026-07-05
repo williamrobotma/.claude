@@ -174,7 +174,7 @@
       "/tmp"
     ]
   },
-  "model": "claude-fable-5[1m]",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
@@ -246,6 +246,7 @@
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
