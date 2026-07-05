@@ -27,6 +27,10 @@ export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-$HOME/.ssh/agent.sock}"
 # map lives in per-clone git config, not the repo, so (re)set it here; idempotent.
 git config merge.claude-settings.driver 'python3 "$HOME/.claude/merge-settings.py" %O %A %B'
 
+# Optional, modular per-machine provisioning (idempotent symlinks etc.). Its own
+# file; delete it and this line no-ops. Never allowed to fail the sync.
+[ -x "$repo/provision.sh" ] && "$repo/provision.sh" >>"$log" 2>&1 || true
+
 case "${1:-}" in
   pull)
     git pull --no-rebase --no-edit --quiet 2>>"$log" \

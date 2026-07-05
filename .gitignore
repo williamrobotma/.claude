@@ -8,6 +8,8 @@
 !sync.sh
 !merge-settings.py
 !statusline-command.sh
+!provision.sh
+!rumdl.toml
 !hooks/
 !hooks/*.py
 !commands/
