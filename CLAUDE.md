@@ -54,6 +54,7 @@ Solo researcher; personal experimentation only. No enterprise/production complex
   - short bullets; nest sub-bullets to organize
   - Python code rules (80-col wrap, "avoid nesting") do NOT transfer to markdown
 - Rewriting existing text: preserve its information exactly; flag anything added or dropped.
+- Reflowing a hard-wrapped `.md` to soft-wrap: reflow the WHOLE file (mixed hard+soft is worse), preserve content exactly, verify before commit with a whitespace-collapsed token diff (`diff <(git show HEAD:f | tr -s '[:space:]' ' ') <(tr -s '[:space:]' ' ' < f)` must be empty).
 - Chat: answer first, bullets/tables over paragraphs, no preamble/recap/filler.
 
 ## Tidy+Review Pass
