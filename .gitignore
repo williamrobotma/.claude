@@ -8,10 +8,15 @@
 !sync.sh
 !merge-settings.py
 !statusline-command.sh
+!provision.sh
+!rumdl.toml
+!environment-devtools.yml
 !hooks/
 !hooks/*.py
 !commands/
 !commands/sync-push.md
+!agents/
+!agents/*.md
 !skills/
 !skills/**/
 !skills/**/*.md

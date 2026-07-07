@@ -1,0 +1,37 @@
+# environment-devtools.yml - WIP (user-global; lives in ~/.claude, synced across machines)
+#
+# OPTIONAL, per-machine FALLBACK dev-CLI env. NOT required and NOT canonical: a machine
+# may instead deliver these tools via pipx / apt / cargo / brew / standalone binaries.
+# The npm-into-devtools route below is the fallback for boxes without pipx/apt. Provides:
+#   nodejs  -> OpenSpec CLI + context7; and npm (which delivers rumdl, see below)
+#   ripgrep -> backs the harness Grep tool
+#   jq      -> JSON munging
+# python=3.11 is runtime-only (the CLIs do NOT need it); pinned per user directive
+# 2026-07-05. NO pip in this env (pip-in-conda is scoped to the diffusion_pip env per
+# the user guardrail; these CLIs arrive via npm, not pip).
+#
+# Reproducible bring-up (this file lives in ~/.claude; commands use its full path).
+# Layer 1 = conda; layers 2-3 are manual (conda cannot express npm -g or PATH wiring):
+#   1. conda env - create first time, or reconcile an existing env (adds python=3.11
+#      and KEEPS the npm-global layer below, which conda does not manage):
+#        conda env create -f ~/.claude/environment-devtools.yml     # first time
+#        conda env update -f ~/.claude/environment-devtools.yml     # reconcile existing
+#   2. npm-global CLIs (NOT expressible in a conda env file):
+#        conda run -n devtools npm install -g @fission-ai/openspec rumdl
+#   3. user-global PATH - symlink into ~/.local/bin (derive paths via `conda run`):
+#        for c in rg jq node openspec; do ln -sf "$(conda run -n devtools which "$c")" ~/.local/bin/; done
+#        r=$(conda run -n devtools npm root -g); ln -sf "$(find "$r" -path '*@rumdl/cli-*/rumdl' -type f | head -1)" ~/.local/bin/rumdl
+#      Notes: rg/jq/node are native ELF (node-independent). rumdl -> symlink the ELF
+#      binary, NOT devtools/bin/rumdl (a node launcher shim). openspec is a node app
+#      with no native binary, so `node` is symlinked too for its shim to resolve.
+#
+# Machine-instance-agnostic: no `prefix:` line, no "verified on THIS box" version stamp.
+# conda-forge pins below resolve on any same-type (linux-64) machine.
+name: devtools
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - nodejs=26
+  - ripgrep=15
+  - jq=1.8

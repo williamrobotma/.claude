@@ -1,0 +1,9 @@
+# rumdl user-global config, synced via ~/.claude.
+# provision.sh symlinks ~/.config/rumdl/rumdl.toml -> this file, so rumdl reads it
+# at the standard XDG location on every machine.
+# MD013 (line-length; its reflow hard-wraps) is disabled to preserve the
+# never-hard-wrap / one-logical-line-per-bullet soft-wrap style. rumdl does NOT
+# enforce soft-wrap; disabling MD013 only stops it from fighting the style.
+[global]
+disable = ["MD013"]
+respect-gitignore = true

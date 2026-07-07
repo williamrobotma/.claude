@@ -147,6 +147,14 @@
       "Bash(rm -rf $HOME*)",
       "Bash(git push --force*)",
       "Bash(git push -f *)",
+      "Bash(conda activate base)",
+      "Bash(conda activate base *)",
+      "Bash(mamba activate base)",
+      "Bash(mamba activate base *)",
+      "Bash(* -n base)",
+      "Bash(* -n base *)",
+      "Bash(* --name base)",
+      "Bash(* --name base *)",
       "Bash(nvidia-smi -r*)",
       "Bash(nvidia-smi --gpu-reset*)",
       "Bash(nvidia-smi -pl*)",
@@ -174,7 +182,7 @@
       "/tmp"
     ]
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -237,14 +245,16 @@
       }
     }
   },
-  "effortLevel": "low",
+  "effortLevel": "xhigh",
   "advisorModel": "opus",
+  "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
   "verbose": false,
   "autoCompactEnabled": true,
+  "switchModelsOnFlag": false,
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
