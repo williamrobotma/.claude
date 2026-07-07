@@ -238,7 +238,7 @@
     }
   },
   "effortLevel": "low",
-  "advisorModel": "fable",
+  "advisorModel": "opus",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
