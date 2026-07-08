@@ -100,6 +100,7 @@
       "Bash(git -C * diff *)",
       "Bash(git -C * log *)",
       "Bash(git -C ~/.claude status --short)",
+      "Bash(cd ~/.claude*)",
       "Bash(git -C /home/wma/.claude ls-files)",
       "Bash(git -C /home/wma/.claude check-ignore settings.local.json)",
       "Bash(git merge-base *)",
