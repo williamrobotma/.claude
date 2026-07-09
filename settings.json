@@ -182,7 +182,7 @@
       "/tmp"
     ]
   },
-  "model": "sonnet",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -245,14 +245,13 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "fable",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
-  "verbose": false,
   "autoCompactEnabled": true,
   "switchModelsOnFlag": false,
   "fileCheckpointingEnabled": true,
