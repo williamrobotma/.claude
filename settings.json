@@ -182,7 +182,7 @@
       "/tmp"
     ]
   },
-  "model": "fable",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -222,7 +222,7 @@
     "context7@claude-plugins-official": false,
     "feature-dev@claude-plugins-official": false,
     "github@claude-plugins-official": false,
-    "hookify@claude-plugins-official": false,
+    "hookify@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "consensus@life-sciences": false,
