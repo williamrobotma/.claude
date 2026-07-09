@@ -67,6 +67,8 @@ After refactoring: scan for dead assignments and orphaned functions left over fr
 - Kill by PGID, not `pkill -f <pattern>`: if the pattern appears in your own command line,
   pkill matches and kills the wrapper shell first. Use
   `kill -KILL -$(ps -o pgid= -p <pid> | tr -d ' ')`.
+- Show a command complete every time it appears, even when restating it shorter.
+- Give a reused identifier one spelling throughout the conversation.
 
 ## Git & persisting guidance
 - Commit only a wrapped-up repo: no untracked junk, stale docs, or half-finished edits; `git add -A` must be the correct call and `git status` clean afterward. Never selective-add that leaves loose threads; never leave a relevant doc (handoff/status note) out of its commit.
