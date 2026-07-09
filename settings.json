@@ -192,6 +192,10 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/awk-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sync-pusher-guard.py"
           }
         ]
       }
