@@ -30,20 +30,24 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 The minimum that solves the problem; nothing speculative. The best code is the code you never wrote.
 - Before building or deep-debugging, check the docstring/docs and search online for a known, simpler fix - don't tunnel-vision into re-deriving or hand-rolling a solved problem.
 - Prefer an existing solution in order: reuse in-codebase -> stdlib -> platform/tool feature -> installed dep -> then build the minimum.
-- No features, abstractions, config, or speculative guards beyond what was asked. 200 lines that could be 50 -> rewrite it.
+- No features, abstractions, config, or defensive code (guards, validation, error-handling) beyond what's needed: speculative handling adds complexity and hides the real behavior, making failures harder to diagnose.
+- Fail visibly and predictably: never silently change behavior or swallow a bad state - it drifts out-of-spec and undiagnosable (cf. the 737 MAX MCAS).
+    - Add a proactive warning/flag only where the signal must not be lost (e.g. a result's provenance).
+- 200 lines that could be 50 -> rewrite it. If a rule needs layers to explain, simplify the behavior.
 
 ### 5. Surgical changes
 Touch only what you must; clean up only your own mess.
 - Every changed line traces to the request; match existing style. Leave adjacent dead code (note it, don't delete).
 - Don't edit a running or source-of-truth file without consent; show a spec-file change in full-document context first.
-- Then tidy only what you touched: bugs, edge cases, test gaps, comments, imports, and orphans your change created.
+- After the task, a hygiene pass over the code you touched this session (not just the last edit - a sanctioned exception to only-what-was-asked): bugs, edge cases, test gaps, comments, imports, orphans. Adjacent untouched logic stays surgical.
 
 ### 6. Verify before done
 Define success up front; prove it before calling it done.
 - Before a non-trivial change, state your diagnosis + approach + tradeoffs (diff size, new flag, brittleness); flag any prior-rejected approach.
 - "Fix the bug" -> a failing test that reproduces it, then make it pass. Don't game the check (no hard-coding, no deleting it).
 - Multi-step task -> plan as `1. [step] -> verify: [check]`.
-- "Done" = command run + output shown + a note of what changed; no result without its provenance + validity caveat.
+- "Done" = command run + output shown + a note of what changed.
+- No result shown anywhere without its provenance + validity caveat.
 
 ### 7. Learn from every correction
 After any correction, write the lesson to the project's .claude/rules/lessons.md - auto-loaded every session as a native project rule.
@@ -53,22 +57,27 @@ Working if: fewer confident-wrong claims, fewer "you didn't read it," fewer need
 ## Writing
 - ASCII only: `->` not the arrow glyph, `x` not the multiply sign, `-` not middot; em-dash -> `:`, `;`, or ` - `.
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
+- Concise = dense per word, not fewer lines: split multiple ideas into separate bullets/sub-bullets, never cram them onto one line (applies to every .md).
 - Chat: answer first, bullets/tables over paragraphs, no preamble/recap/filler.
 - Reuse one fixed format per recurring output type (plan, review, commit, diff-summary); define it once with a concrete example.
 - Rewriting existing text: preserve its information; flag anything added or dropped.
 
 ## Git
 - Commit only a wrapped-up repo: tree clean, no junk or half-finished edits, relevant handoff/status doc included.
-- Durability: keep rules and long-task state in git-tracked files, not chat or the gitignored `~/.claude/projects/*/memory/`. A resume-point (stage / done / next) lets a fresh session continue after /clear or /compact.
+- Durability: keep durable state in git-tracked files (rules, long-task state), never chat or the gitignored `~/.claude/projects/*/memory/`.
+    - A resume-point (stage / done / next) lets a fresh session continue after /clear or /compact.
 
 ## Python
-- Idiomatic, pythonic code (Zen of Python): prefer clear standard constructs over hand-rolled or clever equivalents.
-    - `==` not `.equals`; built-ins (`zip`, `enumerate`, comprehensions) over manual loops; `with` for resources; avoid needless nesting.
-- Glue, not kernel: it pays the readability tax. Push complexity down into named, validated functions; keep orchestration boringly explicit.
-- Fail-visible over silent-skip: a guard that quietly returns on degenerate input hides bugs; let it surface unless the state is known-benign.
-- `assert` only for internal invariants (stripped by `-O`); validate external input with real exceptions.
+- Idiomatic, pythonic code: clear standard constructs over hand-rolled or clever equivalents; keep the main path boringly explicit.
+    - e.g. `==` not `.equals`; `with` for resources; no needless nesting.
+- `assert` for internal invariants (stripped by `-O`); real exceptions for bad external input; never quietly return/skip on a degenerate state.
 - Explicit over implicit: behavior that differs by caller -> a named keyword (`paths_only=True`), not `hasattr`/presence checks.
 - Prefer covariant hints (`Sequence`/`Iterable`) over invariant `list`/`Tuple` on public signatures.
-- Docstrings/comments: Google style, wrap 80 (Python only). Depth matches the contract - self-evident -> one line, else Args/Returns/Raises. Comment only the non-obvious why.
-- Notebooks: VS Code `# %%` cells, main path scannable top-to-bottom, "Restart & Run All" is correct; extract stable logic to a `.py`. Never comment/uncomment to switch behavior - use if/else or a parameter.
+- Docstrings/comments: Google style, wrap 80 (Python only).
+    - Depth matches the contract: self-evident name+signature -> one summary line; else Args/Returns/Raises.
+    - Comment only the non-obvious why.
+- Notebooks: VS Code `# %%` cells; main path scannable top-to-bottom.
+    - "Restart & Run All" is the definition of correct.
+    - Once stable, extract logic to an importable `.py`.
+    - Never comment/uncomment to switch behavior - use if/else or a parameter.
 - After Python edits, the tidy pass runs ruff + pylint + a targeted smoke check unless told not to.
