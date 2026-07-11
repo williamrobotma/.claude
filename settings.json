@@ -100,6 +100,7 @@
       "Bash(git -C * diff *)",
       "Bash(git -C * log *)",
       "Bash(git -C ~/.claude status --short)",
+      "Bash(cd ~/.claude && git status && git log)",
       "Bash(git -C /home/wma/.claude ls-files)",
       "Bash(git -C /home/wma/.claude check-ignore settings.local.json)",
       "Bash(git merge-base *)",
@@ -182,7 +183,7 @@
       "/tmp"
     ]
   },
-  "model": "fable",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -191,6 +192,10 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/awk-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sync-pusher-guard.py"
           }
         ]
       }
@@ -215,12 +220,12 @@
     "command": "~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "claude-code-setup@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
     "commit-commands@claude-plugins-official": false,
     "context7@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": false,
     "github@claude-plugins-official": false,
     "hookify@claude-plugins-official": true,
     "pyright-lsp@claude-plugins-official": true,
@@ -229,7 +234,7 @@
     "pubmed@life-sciences": false,
     "scvi-tools@life-sciences": false,
     "single-cell-rna-qc@life-sciences": false,
-    "skill-creator@claude-plugins-official": false
+    "skill-creator@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "life-sciences": {
@@ -245,8 +250,8 @@
       }
     }
   },
-  "effortLevel": "high",
-  "advisorModel": "fable",
+  "effortLevel": "xhigh",
+  "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "skipWorkflowUsageWarning": true,

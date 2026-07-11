@@ -38,6 +38,7 @@ case "${1:-}" in
       || note "pull: failed or conflicted - resolve in the working tree (see git error above)"
     ;;
   save)
+    # note "save: NEUTRALIZED (CLAUDE.md redo review in progress; restore by removing this line)"; exit 0
     if [ -n "$(git status --porcelain)" ]; then
       git add -A
       git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
@@ -47,7 +48,7 @@ case "${1:-}" in
     ;;
   push)
     git pull --no-rebase --no-edit --quiet 2>>"$log" \
-      || { note "push: aborted - pull failed or conflicted; resolve, then retry (see git error above)"; exit 0; }
+      || { git merge --abort 2>/dev/null; note "push: aborted - pull failed or conflicted; merge aborted (nothing committed); run 'sync.sh pull' to resolve, then retry (see git error above)"; exit 0; }
     git push --quiet 2>>"$log" && note "push: ok" || note "push: failed (see git error above)"
     ;;
   *)
