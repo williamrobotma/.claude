@@ -227,7 +227,7 @@
     "context7@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": false,
     "github@claude-plugins-official": false,
-    "hookify@claude-plugins-official": true,
+    "hookify@claude-plugins-official": false,
     "pyright-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
     "consensus@life-sciences": false,
