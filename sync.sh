@@ -38,6 +38,7 @@ case "${1:-}" in
       || note "pull: failed or conflicted - resolve in the working tree (see git error above)"
     ;;
   save)
+    # note "save: NEUTRALIZED (CLAUDE.md redo review in progress; restore by removing this line)"; exit 0
     if [ -n "$(git status --porcelain)" ]; then
       git add -A
       git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
