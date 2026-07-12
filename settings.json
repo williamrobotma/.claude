@@ -184,6 +184,7 @@
     ]
   },
   "model": "claude-fable-5[1m]",
+  "autoMemoryEnabled": false,
   "hooks": {
     "PreToolUse": [
       {
@@ -196,6 +197,17 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/sync-pusher-guard.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/ruff-check.py"
           }
         ]
       }
