@@ -66,6 +66,15 @@ line="${line} ${DIM}[${model_disp}]${RESET}"
 [ -n "$five_h" ] && line="${line}${DIM} 5h:${RESET}$(pct_color "$five_h")${five_h%.*}%${RESET}"
 [ -n "$seven_d" ] && line="${line}${DIM} 7d:${RESET}$(pct_color "$seven_d")${seven_d%.*}%${RESET}"
 
+# CLAUDE_CODE_ATTRIBUTION_HEADER=0 breaks the auto-mode classifier (429 → "temporarily unavailable")
+# See: https://github.com/anthropics/claude-code/issues/64585
+# The daemon inherits this from whichever session first started it,
+# so background sessions silently carry a stale env forever —
+# this is the workaround (surface it in the status line).
+if [ -n "${CLAUDE_CODE_ATTRIBUTION_HEADER:-}" ]; then
+  line="${line} ${YELLOW}[ATTR:0]${RESET}"
+fi
+
 printf '%s' "$line" 2>/dev/null || \
 echo "${user_host}: ${cwd}" 2>/dev/null || \
 echo "bmm"
