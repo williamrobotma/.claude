@@ -261,7 +261,7 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
