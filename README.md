@@ -75,24 +75,32 @@ Deliberately NOT tracked (and why):
 
 ## Machine-local instructions
 
-For a Claude Code instruction that must never sync to another machine at all - not
-even as an inert, harmless reference in a tracked file - use `~/.claude/CLAUDE.local.md`,
-never `rules/` or `settings.json`.
+For a Claude Code instruction that must never sync to another machine - not even as
+an inert reference in a tracked file - two mechanisms auto-load with a zero tracked
+footprint. Both are discovered from disk by directory scan, so git tracking governs
+only whether they sync, never whether they load (reading a file never consults git):
 
-`~/.claude/CLAUDE.md` is special-cased by Claude Code to load in every session
-regardless of working directory (that's what makes it "global"). `CLAUDE.local.md`
-is NOT part of that special case - it only loads via the ordinary directory-walk-up-
-from-cwd mechanism, so `~/.claude/CLAUDE.local.md` only takes effect in a session
-whose cwd is actually inside `~/.claude`. It requires no `.gitignore` line (the root
-`*` already covers it) and no reference anywhere - Claude Code discovers it on its
-own by walking the directory tree, so nothing about it ever appears in a tracked
-file on any other machine.
+- `~/.claude/rules/<name>.md` with no `paths:` frontmatter - the genuinely global one.
+  It loads at launch in every session, in every project, at the same priority as
+  `~/.claude/CLAUDE.md` (docs: "personal rules in `~/.claude/rules/` apply to every
+  project"; rules "without `paths` are loaded at launch"). The `!rules/**/*.md` allowlist
+  tracks rules by default; to keep one local, add an ignore-back line such as
+  `rules/*.local.md` after it. A `paths:`-scoped rule instead loads lazily - only when
+  Claude reads a file matching the glob - so it never fires on a no-file conversational
+  turn; omit `paths:` for anything that must always apply.
+- `~/.claude/CLAUDE.local.md` - zero-footprint but not global. `~/.claude/CLAUDE.md` is
+  special-cased to load in every session regardless of cwd; `CLAUDE.local.md` is not,
+  loading only via directory-walk-up-from-cwd, so `~/.claude/CLAUDE.local.md` only takes
+  effect when cwd is inside `~/.claude`. It needs no `.gitignore` line (root `*` covers
+  it) and no reference. Use it for instructions you only need in `~/.claude` sessions;
+  use an untracked `rules/*.md` for ones you need everywhere.
 
-Anything placed in `rules/`, `hooks/`, or `settings.json` - tracked or not - is
-either present on every machine (if tracked) or requires a reference/registration
-somewhere that IS tracked to ever fire (if not) - there is no way to make those
-mechanisms auto-load without a tracked footprint. `CLAUDE.local.md` is the only
-global-scope file with a genuinely zero-footprint local mechanism.
+`hooks/` and `settings.json` cannot auto-load untracked: a hook fires only once
+registered in `settings.json`, and that registration is itself tracked. So `rules/`
+and `CLAUDE.local.md` are the only zero-footprint local mechanisms - and only an
+untracked no-`paths` `rules/*.md` is both zero-footprint and global. Check what
+actually loaded with `/memory`, or the `InstructionsLoaded` hook (logs what loads,
+when, and why). Ref: https://code.claude.com/docs/en/memory
 
 ## Adding a new tracked file
 
