@@ -162,6 +162,44 @@ refused, and nothing on either side is silently overwritten or deleted. Bare `gi
 is not in the permission allowlist, so `/sync-push` prompts - that prompt is the gate.
 `sync.sh` always exits 0 (never stalls a session) and logs to `sync.log` (untracked).
 
+## GitHub access model (git = SSH, API = gh CLI, no token in env)
+
+How this machine - and Claude Code on it - reaches GitHub. Two channels, neither puts a
+token in the environment:
+
+- **git transport = SSH.** clone/fetch/push use `git@github.com:...` and authenticate
+  through the ssh-agent (set up in `~/.bashrc`: one shared agent at `~/.ssh/agent.sock`,
+  exported *above* the interactive guard so login and non-interactive tool shells alike
+  inherit it). No token involved.
+- **API / automation = `gh` CLI via Bash.** `gh` reads its own credential store
+  (`~/.config/gh/hosts.yml`) and needs nothing in the environment; Claude runs `gh pr`,
+  `gh issue`, `gh api`, etc. as ordinary Bash commands.
+
+Deliberately NOT used: a global `GITHUB_PERSONAL_ACCESS_TOKEN` export. An env token sits
+in every process's environment - inherited by every subshell and tool - for a single
+consumer, the remote GitHub MCP plugin (`github@claude-plugins-official`, kept disabled).
+git needs no token and `gh` carries its own, so nothing exports one. If you ever enable
+that plugin, inject the token at launch instead of globally:
+
+    claude() { GITHUB_PERSONAL_ACCESS_TOKEN="$(gh auth token 2>/dev/null)" command claude "$@"; }
+
+so it lives only in claude's process tree and is minted fresh from gh (follows rotation).
+
+What `settings.json` allows without a prompt vs. what it makes each use ask for:
+
+- **allow** (no prompt): read-only `gh` subcommands - `gh pr view/list/diff/checks/status`,
+  `gh issue view/list/status`, `gh repo view`, `gh run/workflow/release ...`, `gh search`,
+  and `gh auth status` (which masks the token).
+- **prompt** (not allowlisted, so each use asks): writes (`gh pr create`, `gh pr merge`,
+  `gh issue close`, ...), `gh api` with a mutating `--method` (prefix-matching can't tell a
+  GET from a POST), and `gh auth token`. Add specific write commands to the allowlist to
+  run them unattended; add a `deny` for `gh auth token` and reads of
+  `~/.config/gh/hosts.yml` if you want those as hard blocks rather than prompts.
+
+The token in `~/.config/gh/hosts.yml` is gh's own credential (`gho_...`, mode 600); rotate
+it with `gh auth logout -h github.com && gh auth login`. Same posture as the config-repo
+sync above: SSH-only transport, token never in the env.
+
 ## New-machine bootstrap
 
 Fresh machine with no `~/.claude` yet - just clone (nothing local to lose):
