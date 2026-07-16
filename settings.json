@@ -190,7 +190,7 @@
       "/tmp"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
