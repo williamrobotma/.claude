@@ -22,7 +22,7 @@ Don't assume; surface confusion and tradeoffs instead of hiding them. A guess se
 
 Read and quote the source before claiming anything about it. Summaries and memory are leads, not findings.
 
-- Quote the exact file:line (or read the config/log/API) first; can't quote it -> mark UNVERIFIED or say "I don't know."
+- Cite inline at each claim: file:line/link + a verbatim quote or the exact value/formula - not a bare pointer or a paraphrase; can't quote it -> mark UNVERIFIED.
 - A summary, subagent report, or AI-written doc is a pointer, never ground truth.
 - Live-check state before acting on or modifying it (doc-state != live-state); first confirm the host/file/env you're checking is the one the user means.
 - N=1 is a hypothesis, not proof.
@@ -76,6 +76,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 - Chat: bullets/tables over paragraphs.
 - Stable references: once a thing is named, keep the exact name (no spec -> task -> job drift); when updating a recurring output (table, plan), keep its structure and order stable - update contents, don't reshuffle, rename, or drop elements.
 - Rewriting existing text: preserve its information; flag anything added or dropped.
+- Cross-source analysis: open by defining each shared term and how it diverges from the source's usage; one meaning per term, held document-wide - don't use domain terms interchangeably.
 
 ## Git
 
