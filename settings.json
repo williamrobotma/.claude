@@ -183,8 +183,7 @@
       "/tmp"
     ]
   },
-  "model": "claude-fable-5[1m]",
-  "autoMemoryEnabled": false,
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -262,10 +261,11 @@
       }
     }
   },
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
+  "autoMemoryEnabled": false,
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
