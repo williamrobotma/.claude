@@ -8,11 +8,9 @@ Registered per-clone by sync.sh. Called as: merge-settings.py %O %A %B.
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
-import tempfile
 
 # Per-machine preferences: kept as this clone's value, never merged. Everything
 # else (permissions, plugins, hooks, env, ...) falls through to a normal merge.
@@ -63,18 +61,13 @@ def main():
         return  # ours (%A) already holds this machine's values; keep it
 
     # A real key changed too: 3-way text merge, but first neutralize the
-    # per-machine keys so they don't produce spurious conflicts.
-    patched_text = neutralize(ours, theirs, PER_MACHINE & changed)
-    with tempfile.NamedTemporaryFile(
-        "w", suffix=".json", delete=False, encoding="utf-8"
-    ) as tf:
-        tf.write(patched_text)
-        patched = tf.name
-    try:
-        rc = subprocess.call(["git", "merge-file", ours, base, patched])
-    finally:
-        os.unlink(patched)
-    sys.exit(rc)
+    # per-machine keys so they don't produce spurious conflicts. theirs (%B) is
+    # git's throwaway scratch copy and neutralize has already read it, so write
+    # the patched text back over it and hand that to merge-file.
+    patched = neutralize(ours, theirs, PER_MACHINE & changed)
+    with open(theirs, "w", encoding="utf-8") as f:
+        f.write(patched)
+    sys.exit(subprocess.call(["git", "merge-file", ours, base, theirs]))
 
 
 if __name__ == "__main__":

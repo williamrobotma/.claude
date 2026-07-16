@@ -20,6 +20,15 @@ log="$repo/sync.log"
 cd "$repo" 2>/dev/null || exit 0
 note() { echo "$(date '+%F %T') $*" >>"$log"; }
 
+# Commit a dirty tree locally (no network). Used by `save` and before `push`'s
+# pull - /model and /effort write settings.json mid-session, and a dirty tree
+# makes that pull refuse ("local changes would be overwritten by merge").
+commit_pending() {
+  [ -n "$(git status --porcelain)" ] || return 0
+  git add -A
+  git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
+}
+
 # Hooks / the editor's `bash -c` don't source ~/.bashrc, so the shared ssh-agent
 # socket isn't in their env. Point at it here (keep any already-set value) so
 # pull/push can reach the agent. The agent + key load are managed by ~/.bashrc.
@@ -51,21 +60,12 @@ case "${1:-}" in
     ;;
   save)
     # note "save: NEUTRALIZED (CLAUDE.md redo review in progress; restore by removing this line)"; exit 0
-    if [ -n "$(git status --porcelain)" ]; then
-      git add -A
-      git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
-    fi
+    commit_pending
     ahead="$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)"
     [ "$ahead" -gt 0 ] && note "save: $ahead commit(s) pending push (run /sync-push)"
     ;;
   push)
-    # Commit any pending local changes first (same as `save`): /model and
-    # /effort write settings.json mid-session, and a dirty tree makes the pull
-    # below refuse ("local changes would be overwritten by merge").
-    if [ -n "$(git status --porcelain)" ]; then
-      git add -A
-      git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
-    fi
+    commit_pending  # else a mid-session /model or /effort edit blocks the pull
     if ! git pull --no-rebase --no-edit --quiet 2>>"$log"; then
       git merge --abort 2>/dev/null
       note "push: aborted - pull failed or conflicted; merge aborted (nothing committed); run 'sync.sh pull' to resolve, then retry (see git error above)"
