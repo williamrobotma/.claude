@@ -129,10 +129,13 @@ Typical session:
 `settings.json` is rewritten per machine (notably `/model` and `/effort` "save as
 default"), so two machines editing it between syncs used to conflict. Fix:
 `.gitattributes` routes it through `merge-settings.py`, a merge driver registered
-by `sync.sh`. When the only keys that differ are `model`/`effortLevel` it keeps
-this machine's copy; otherwise it falls back to git's normal merge, so any real
-change still surfaces as a visible conflict rather than being silently dropped.
-Model/effort thus stay per-machine and `/model`/`/effort` keep working everywhere.
+by `sync.sh`. When the only keys that differ are per-machine prefs (model,
+effortLevel, ...) it keeps this machine's copy. Otherwise it falls back to git's
+normal merge, but first rewrites the per-machine lines in the incoming copy to
+match ours - so those prefs never spuriously conflict just because a real key
+(a permission, a plugin) changed alongside them, while that real change still
+surfaces as a visible conflict rather than being silently dropped. Model/effort
+thus stay per-machine and `/model`/`/effort` keep working everywhere.
 See `rules/settings-scope.md`.
 
 A merge pull reconciles a divergent remote on its own; it only stops if the same
@@ -156,7 +159,8 @@ the repo and self-distributes):
 
 Everything that touches the network is interactive and deliberate:
 
-- `/sync-push` (or `bash ~/.claude/sync.sh push`) : merge in the remote, then push.
+- `/sync-push` (or `bash ~/.claude/sync.sh push`) : commit any pending local change
+  (so a mid-session `/model`/`/effort` edit can't block the pull), merge in the remote, then push.
 - `bash ~/.claude/sync.sh pull` : merge in the remote (run at the start of a session).
 
 Why no hook does the network: a hook runs a non-interactive shell with no SSH agent,

@@ -25,7 +25,11 @@ at the user level.
   `/model`/`/effort` keep working everywhere.
   - PER_MACHINE (`merge-settings.py`): `model`, `effortLevel`, `tui`, `advisorModel`,
     `askUserQuestionTimeout`, `theme`, `verbose`. `editorMode` is NOT per-machine (it merges).
-  - A settings.json conflict means this set has a gap (a per-machine pref missing) - fix the set, don't hand-resolve.
+  - The driver neutralizes these keys even in the fallback path (rewrites the incoming
+    per-machine lines to match ours), so they never conflict just because a real key changed
+    alongside them. A settings.json conflict that survives is therefore a genuine real-key
+    clash (or a gap in this set) - hand-resolve the real key; if a per-machine pref conflicted,
+    the set has a gap - add it here.
 - Not used: the `ANTHROPIC_MODEL` / `CLAUDE_CODE_EFFORT_LEVEL` env vars would also
   pin model/effort per-machine, but per the docs they beat interactive
   `/model`/`/effort` too, making those commands inert - the merge driver does not.

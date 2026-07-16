@@ -59,6 +59,13 @@ case "${1:-}" in
     [ "$ahead" -gt 0 ] && note "save: $ahead commit(s) pending push (run /sync-push)"
     ;;
   push)
+    # Commit any pending local changes first (same as `save`): /model and
+    # /effort write settings.json mid-session, and a dirty tree makes the pull
+    # below refuse ("local changes would be overwritten by merge").
+    if [ -n "$(git status --porcelain)" ]; then
+      git add -A
+      git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
+    fi
     if ! git pull --no-rebase --no-edit --quiet 2>>"$log"; then
       git merge --abort 2>/dev/null
       note "push: aborted - pull failed or conflicted; merge aborted (nothing committed); run 'sync.sh pull' to resolve, then retry (see git error above)"
