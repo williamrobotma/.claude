@@ -23,7 +23,14 @@ Steps:
    - The SessionEnd hook auto-saves, but has not run mid-session.
 2. Run `bash ~/.claude/sync.sh push`.
    - It merges in the remote, then pushes.
-3. Read the last few lines of `~/.claude/sync.log`.
+   - On success it prints `push: ok` and exits 0. On failure it prints
+     `push: FAILED ...` and exits non-zero.
+3. Read the last few lines of `~/.claude/sync.log` to confirm.
+
+Success is a POSITIVE signal, never the absence of one. Report "pushed ok"
+ONLY if you saw `push: ok` (stdout / newest log line). No output, a non-zero
+exit, or a newest log line of `push: aborted` / `push: failed` is a FAILURE -
+report it with the log lines; never infer success from silence.
 
 If the push fails, read the git error in the log and handle it by type.
 

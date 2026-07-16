@@ -10,7 +10,9 @@
 # credentials are loaded - hooks have no agent and bypass the permission system.
 # pull/push MERGE rather than fast-forward-only: divergence is reconciled, never
 # silently overwritten or deleted; the merge stops on conflict for you to resolve.
-# Always exits 0 so it never stalls a session. Logs to ~/.claude/sync.log.
+# `save` always exits 0 so a hook never stalls a session; the interactive
+# pull/push print an explicit ok/FAILED to stdout and exit non-zero on failure
+# so the caller can detect it (silence is not success). Logs to ~/.claude/sync.log.
 set -uo pipefail
 
 repo="$HOME/.claude"
@@ -23,6 +25,13 @@ note() { echo "$(date '+%F %T') $*" >>"$log"; }
 # pull/push can reach the agent. The agent + key load are managed by ~/.bashrc.
 export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-$HOME/.ssh/agent.sock}"
 
+# Some past tool pinned a per-session SSH_AUTH_SOCK into git's core.sshCommand;
+# that socket dies with its session and then silently breaks every git-over-ssh
+# op here (Permission denied). We export the stable socket above, so drop any
+# such /tmp pin and let git inherit it.
+git config --local --get core.sshCommand 2>/dev/null | grep -q '/tmp/ssh-' \
+  && { git config --local --unset core.sshCommand; note "repaired: dropped stale /tmp core.sshCommand"; } || true
+
 # Register the settings.json merge driver named in .gitattributes. The name->command
 # map lives in per-clone git config, not the repo, so (re)set it here; idempotent.
 git config merge.claude-settings.driver 'python3 "$HOME/.claude/merge-settings.py" %O %A %B'
@@ -33,9 +42,12 @@ git config merge.claude-settings.driver 'python3 "$HOME/.claude/merge-settings.p
 
 case "${1:-}" in
   pull)
-    git pull --no-rebase --no-edit --quiet 2>>"$log" \
-      && note "pull: ok" \
-      || note "pull: failed or conflicted - resolve in the working tree (see git error above)"
+    if git pull --no-rebase --no-edit --quiet 2>>"$log"; then
+      note "pull: ok"; echo "pull: ok"
+    else
+      note "pull: failed or conflicted - resolve in the working tree (see git error above)"
+      echo "pull: FAILED - conflicted or unreachable; see $log"; exit 1
+    fi
     ;;
   save)
     # note "save: NEUTRALIZED (CLAUDE.md redo review in progress; restore by removing this line)"; exit 0
@@ -47,9 +59,17 @@ case "${1:-}" in
     [ "$ahead" -gt 0 ] && note "save: $ahead commit(s) pending push (run /sync-push)"
     ;;
   push)
-    git pull --no-rebase --no-edit --quiet 2>>"$log" \
-      || { git merge --abort 2>/dev/null; note "push: aborted - pull failed or conflicted; merge aborted (nothing committed); run 'sync.sh pull' to resolve, then retry (see git error above)"; exit 0; }
-    git push --quiet 2>>"$log" && note "push: ok" || note "push: failed (see git error above)"
+    if ! git pull --no-rebase --no-edit --quiet 2>>"$log"; then
+      git merge --abort 2>/dev/null
+      note "push: aborted - pull failed or conflicted; merge aborted (nothing committed); run 'sync.sh pull' to resolve, then retry (see git error above)"
+      echo "push: FAILED - pull conflicted or unreachable before push; nothing pushed. See $log"; exit 1
+    fi
+    if git push --quiet 2>>"$log"; then
+      note "push: ok"; echo "push: ok"
+    else
+      note "push: failed (see git error above)"
+      echo "push: FAILED - git push failed; nothing pushed. See $log"; exit 1
+    fi
     ;;
   *)
     note "usage: sync.sh save|pull|push"
