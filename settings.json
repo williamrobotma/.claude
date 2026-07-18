@@ -269,7 +269,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
