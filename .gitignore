@@ -10,6 +10,7 @@
 !statusline-command.sh
 !provision.sh
 !rumdl.toml
+!ruff.toml
 !environment-devtools.yml
 !hooks/
 !hooks/*.py

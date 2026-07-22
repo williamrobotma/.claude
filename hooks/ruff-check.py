@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PostToolUse(Edit|Write) hook: ruff-check any edited .py file.
+"""PostToolUse(Edit|Write|NotebookEdit) hook: ruff-check any edited .py/.ipynb.
 
 Exit 2 feeds the findings back to Claude so the fix happens in-turn
 (the task-end-tidy contract rule, enforced instead of remembered).
@@ -15,8 +15,9 @@ try:
 except (json.JSONDecodeError, ValueError):
     sys.exit(0)  # unreadable input -> nothing to check
 
-path = (data.get("tool_input") or {}).get("file_path", "")
-if not path.endswith(".py"):
+tool_input = data.get("tool_input") or {}
+path = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
+if not path.endswith((".py", ".ipynb")):
     sys.exit(0)
 
 result = subprocess.run(

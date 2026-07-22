@@ -105,10 +105,9 @@
       "Bash(SSH_AUTH_SOCK=/home/wma/.ssh/agent.sock ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -T git@github.com)",
       "Bash(git -C * diff *)",
       "Bash(git -C * log *)",
-      "Bash(git -C ~/.claude status --short)",
-      "Bash(cd ~/.claude && git status && git log)",
-      "Bash(git -C /home/wma/.claude ls-files)",
-      "Bash(git -C /home/wma/.claude check-ignore settings.local.json)",
+      "Bash(git -C * status*)",
+      "Bash(git -C * ls-files*)",
+      "Bash(git -C * check-ignore*)",
       "Bash(git merge-base *)",
       "Bash(git remote -v)",
       "Bash(git remote show *)",
@@ -116,7 +115,6 @@
       "Bash(git rev-parse *)",
       "Bash(git blame *)",
       "Bash(git submodule status*)",
-      "Bash(git fetch *)",
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(ruff *)",
@@ -213,11 +211,15 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|NotebookEdit",
         "hooks": [
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/ruff-check.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/glyph-check.py"
           }
         ]
       }
