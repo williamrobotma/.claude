@@ -71,7 +71,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 
 ## Writing
 
-- Basic keyboard symbols only: `->`, not the arrow glyph; `x` not the multiply sign; `-` not middot; `:`, `;`, or ` - ` over em-dash, etc.
+- Basic keyboard symbols only in chat, code, and commits: `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot (a hook now enforces this for .md files).
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
 - Concise = dense per word, not fewer lines: split multiple ideas into sub-bullets, don't cram them onto one line (all .md).
 - Chat: bullets/tables over paragraphs.

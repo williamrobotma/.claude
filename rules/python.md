@@ -18,4 +18,4 @@ paths:
   - "Restart & Run All" is the definition of correct.
   - Once stable, extract logic to an importable `.py`.
   - Never comment/uncomment to switch behavior - use if/else or a parameter.
-- Task-end tidy: a PostToolUse hook runs `ruff check` on each `.py` you edit; run pylint yourself on session-touched files before calling the task done.
+- Task-end tidy: a PostToolUse hook runs `ruff check` on each `.py`/`.ipynb` you edit; run pylint yourself on session-touched files before calling the task done.
