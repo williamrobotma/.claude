@@ -14,7 +14,7 @@ Prevents the recurring mistakes. Follow the intent, not the letter; on trivial t
 
 Don't assume; surface confusion and tradeoffs instead of hiding them. A guess sends work in the wrong direction.
 
-- Ambiguous scope/term, or multiple readings -> stop and ask; present the readings, don't pick silently.
+- Ambiguous scope/term, multiple readings, or nothing existing fits cleanly -> stop and ask; present the readings/options, don't pick silently or force the nearest match.
 - Before a non-trivial change, state your diagnosis + approach + tradeoffs (diff size, new flag, brittleness); flag any prior-rejected approach.
 - Going sideways (errors recurring, results don't fit) -> re-plan; fix the root cause, not a band-aid.
 
@@ -66,6 +66,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 ## Delegation
 
 - Match subagent to task: `scout` (haiku) to locate things, `mechanic` (sonnet) for well-specified mechanical edits; judgment work stays in the main loop or inherits the session model.
+- Price a workflow/harness before invoking: agent count x model (agents inherit the session model unless overridden). Mostly-answered question -> finish inline; legwork stages (search/fetch/verify) go to cheap models.
 - A scout's "not found" is a lead, not a conclusion (rule 2).
 
 ## Writing
@@ -74,6 +75,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
 - Concise = dense per word, not fewer lines: split multiple ideas into sub-bullets, don't cram them onto one line (all .md).
 - Chat: bullets/tables over paragraphs.
+- Clarity outranks convention: plain technical language in clear, logical points; no verbose prose, no jargon.
 - Stable references: once a thing is named, keep the exact name (no spec -> task -> job drift); when updating a recurring output (table, plan), keep its structure and order stable - update contents, don't reshuffle, rename, or drop elements.
 - Rewriting existing text: preserve its information; flag anything added or dropped.
 - Cross-source analysis: open by defining each shared term and how it diverges from the source's usage; one meaning per term, held document-wide - don't use domain terms interchangeably.
