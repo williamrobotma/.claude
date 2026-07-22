@@ -2,9 +2,11 @@
 """PostToolUse(Edit|Write) hook: flag non-keyboard glyphs in new .md text.
 
 Enforces the CLAUDE.md Writing rule (basic keyboard symbols only: ->, x, -,
-ASCII quotes) deterministically instead of by prompt. Checks only the text
-being written (Write content / Edit new_string), so pre-existing prose in a
-file never nags. Exit 2 feeds the offending glyphs back for an in-turn fix.
+ASCII quotes) deterministically instead of by prompt. Edits check new_string
+only, so pre-existing prose never nags; a full-file Write carries the whole
+file in `content`, so old glyphs (e.g. quoted external text) do re-flag
+there. There is no escape hatch for a legitimately quoted glyph - exit 2 is
+feedback, not a block, and the leave-untouched-text rule outranks this check.
 """
 import json
 import sys
@@ -22,7 +24,7 @@ GLYPHS = {
     "”": '"',           # right curly double quote
     "‘": "'",           # left curly single quote
     "’": "'",           # right curly single quote
-    " ": " ",           # no-break space
+    "\u00a0": " ",  # no-break space (escaped: invisible as a literal)
 }
 
 try:

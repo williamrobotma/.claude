@@ -106,7 +106,7 @@
       "Bash(git -C * log *)",
       "Bash(git -C * status*)",
       "Bash(git -C * ls-files*)",
-      "Bash(git -C * check-ignore *)",
+      "Bash(git -C * check-ignore*)",
       "Bash(git merge-base *)",
       "Bash(git remote -v)",
       "Bash(git remote show *)",
