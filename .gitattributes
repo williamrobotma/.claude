@@ -1,3 +1,5 @@
+* text=auto eol=lf
+
 # settings.json is merged by merge-settings.py (driver registered in sync.sh):
 # keeps this machine's per-machine prefs (model, effortLevel, tui, advisorModel,
 # askUserQuestionTimeout, theme, verbose), else falls back to a normal merge.

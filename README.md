@@ -29,7 +29,7 @@ Tracked:
 - `CLAUDE.md` - global preferences / instructions
 - `settings.json` - Claude Code harness settings (permissions, plugins, model, hooks)
 - `.gitignore` - the allowlist itself
-- `.gitattributes` - routes settings.json through the `merge-settings.py` driver
+- `.gitattributes` - normalizes line endings to LF (`rules/git-line-endings.md`), routes settings.json through the `merge-settings.py` driver
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
 - `merge-settings.py` - settings.json merge driver (see "Handling mismatches")
 - `statusline-command.sh` - custom status line (settings.json points at it; needs `python3`)
