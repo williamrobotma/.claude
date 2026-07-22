@@ -20,7 +20,7 @@ SKIP_BEFORE_CMD = {"sudo", "env", "nohup", "nice", "command", "time", "stdbuf",
 
 
 def stage_commands(command):
-    """Leading command word of each stage, quote-aware (so `grep awk` is safe)."""
+    """Leading command word of each stage, quote-aware (`grep awk` is safe)."""
     lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
     cmds, expect_cmd = [], True

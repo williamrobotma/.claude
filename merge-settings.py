@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""settings.json merge driver: if the only keys that differ are per-machine
-preferences, keep ours; otherwise fall back to git's normal 3-way merge (which
-unions shared additions like permissions line-by-line). Before that fallback,
-rewrite theirs' per-machine key lines to match ours, so those prefs never turn
-into a hand-resolved conflict just because a real key changed alongside them.
-Registered per-clone by sync.sh. Called as: merge-settings.py %O %A %B.
+"""settings.json merge driver: keep per-machine prefs, merge the rest.
+
+If the only keys that differ are per-machine preferences, keep ours; otherwise
+fall back to git's normal 3-way merge (which unions shared additions like
+permissions line-by-line). Before that fallback, rewrite theirs' per-machine
+key lines to match ours, so those prefs never turn into a hand-resolved
+conflict just because a real key changed alongside them. Registered per-clone
+by sync.sh. Called as: merge-settings.py %O %A %B.
 """
 
 import json

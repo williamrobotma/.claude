@@ -17,4 +17,12 @@ if [ -f "$HOME/.claude/rumdl.toml" ] && [ ! -e "$HOME/.config/rumdl/rumdl.toml" 
   ln -s "$HOME/.claude/rumdl.toml" "$HOME/.config/rumdl/rumdl.toml"
 fi
 
+# ruff: same pattern. Its user-global config lives at the XDG location and
+# applies only when a project has no own ruff config; symlink it at the synced
+# ~/.claude copy. Create ONLY if the target is absent - never clobber.
+if [ -f "$HOME/.claude/ruff.toml" ] && [ ! -e "$HOME/.config/ruff/ruff.toml" ]; then
+  mkdir -p "$HOME/.config/ruff"
+  ln -s "$HOME/.claude/ruff.toml" "$HOME/.config/ruff/ruff.toml"
+fi
+
 exit 0

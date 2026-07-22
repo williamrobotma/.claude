@@ -1,0 +1,25 @@
+# ruff user-global config, synced via ~/.claude.
+# provision.sh symlinks ~/.config/ruff/ruff.toml -> this file, so ruff
+# reads it at the standard XDG location. It applies ONLY when a project has no
+# own ruff config (any project pyproject.toml/ruff.toml overrides it entirely).
+#
+# Encodes the lint-expressible parts of rules/python.md deterministically:
+#   S101: checks the code depends on are a `raise`, never an `assert`
+#         (tests excepted via per-file-ignores).
+#   W505 + max-doc-length: docstrings/comments wrap at 80.
+#   D minus D1xx, google convention: Google-style docstring formatting without
+#     requiring a docstring to exist (depth matches the contract).
+[lint]
+extend-select = ["S101", "W505", "D"]
+ignore = ["D1"]
+
+[lint.per-file-ignores]
+"**/test_*.py" = ["S101"]
+"**/tests/**" = ["S101"]
+"**/conftest.py" = ["S101"]
+
+[lint.pycodestyle]
+max-doc-length = 80
+
+[lint.pydocstyle]
+convention = "google"

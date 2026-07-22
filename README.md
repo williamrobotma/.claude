@@ -14,28 +14,7 @@ machine-independent config and ignores everything else.
 
 ## Tracking model: deny-all allowlist
 
-`.gitignore` ignores everything (`*`) and re-includes specific files:
-
-    *
-    !CLAUDE.md
-    !settings.json
-    !.gitignore
-    !.gitattributes
-    !README.md
-    !LICENSE
-    !sync.sh
-    !merge-settings.py
-    !statusline-command.sh
-    !hooks/
-    !hooks/*.py
-    !commands/
-    !commands/sync-push.md
-    !skills/
-    !skills/**/
-    !skills/**/*.md
-    !rules/
-    !rules/**/
-    !rules/**/*.md
+`.gitignore` ignores everything (`*`) and re-includes specific files - see `.gitignore` itself for the current allowlist (do not duplicate it here; a copy drifts).
 
 `skills/` and `rules/` admit only `*.md`: the gate stays deny-by-default even inside
 them, so a non-md file an agent drops there (a token, a cache) is ignored, not
@@ -53,7 +32,11 @@ Tracked:
 - `.gitattributes` - routes settings.json through the `merge-settings.py` driver
 - `sync.sh` - the save/pull/push sync script (only `save` runs from a hook)
 - `merge-settings.py` - settings.json merge driver (see "Handling mismatches")
-- `statusline-command.sh` - custom status line (settings.json points at it; needs `jq`)
+- `statusline-command.sh` - custom status line (settings.json points at it; needs `python3`)
+- `provision.sh` - optional per-machine provisioning, called from sync.sh if present + executable (idempotent symlinks etc.)
+- `rumdl.toml` - user-global rumdl config; provision.sh symlinks ~/.config/rumdl/rumdl.toml at it
+- `ruff.toml` - user-global ruff config (fallback when a project has none); provision.sh symlinks ~/.config/ruff/ruff.toml at it
+- `environment-devtools.yml` - optional fallback dev-CLI conda env (WIP; see its header comment)
 - `hooks/*.py` - hook scripts registered in settings.json (e.g. the awk PreToolUse guard)
 - `commands/sync-push.md` - the `/sync-push` slash command; delegates the gated push to the `sync-pusher` agent
 - `agents/*.md` - subagents (e.g. `sync-pusher`: runs the push on haiku, off the main context)
