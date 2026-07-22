@@ -59,7 +59,6 @@ case "${1:-}" in
     fi
     ;;
   save)
-    # note "save: NEUTRALIZED (CLAUDE.md redo review in progress; restore by removing this line)"; exit 0
     commit_pending
     ahead="$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)"
     [ "$ahead" -gt 0 ] && note "save: $ahead commit(s) pending push (run /sync-push)"

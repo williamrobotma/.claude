@@ -4,18 +4,15 @@ paths:
   - "**/settings.local.json"
 ---
 
-# Settings scope: no user-level `settings.local.json`
+# Settings scope: `~/.claude/settings.local.json` is home-rooted project-local
 
-Claude Code's "Local" settings scope is `.claude/settings.local.json` inside a
-*project*, not `~/.claude/`. There is no unsynced, machine-local settings file
-at the user level.
+Claude Code has no user-*scope* `settings.local.json` - but that is a statement about scope, not the path. In a session whose project root is the home directory (cwd = `~`), `<project>/.claude/settings.local.json` resolves to exactly `~/.claude/settings.local.json`, which loads as *project-local* settings (precedence: Local > Project > User); the always-allow flow also writes new grants there.
 
+- Grants in that file are live only in home-rooted sessions; a grant meant for every project must be hoisted into `settings.json`.
+- Deleting the file is futile - the next always-allow click in a home-rooted session regenerates it. Leave it untracked (the `.gitignore` catch-all covers it); periodically hoist the portable grants into `settings.json` and drop the crumbs.
 - `/model` and `/effort` "save as default" always write to the tracked, synced
   `~/.claude/settings.json` - there is no unsynced *file* to keep a model/effort
   choice per machine.
-- A file at `~/.claude/settings.local.json` is never read by Claude Code. If
-  one exists, migrate any real content (e.g. permissions) into `settings.json`
-  and delete it.
 - model/effort values used to collide on every sync. Fix: `.gitattributes` routes
   settings.json through `merge-settings.py` (a merge driver registered in
   `sync.sh`). If the only differing keys are per-machine prefs it keeps this

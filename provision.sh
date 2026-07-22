@@ -8,13 +8,16 @@
 # Shell (not Python) on purpose: no interpreter-version constraint.
 set -uo pipefail
 
-# rumdl: its user-global config has no env-var override, so a symlink at the XDG
-# location is the sync mechanism. Point ~/.config/rumdl/rumdl.toml at the synced
-# ~/.claude copy. Create ONLY if the target is absent - never clobber a real file a
-# machine may already have.
-if [ -f "$HOME/.claude/rumdl.toml" ] && [ ! -e "$HOME/.config/rumdl/rumdl.toml" ]; then
-  mkdir -p "$HOME/.config/rumdl"
-  ln -s "$HOME/.claude/rumdl.toml" "$HOME/.config/rumdl/rumdl.toml"
-fi
+# rumdl/ruff: their user-global configs have no env-var override, so a symlink
+# at the XDG location is the sync mechanism: ~/.config/<tool>/<tool>.toml ->
+# the synced ~/.claude copy. Create ONLY if the target is absent - never
+# clobber a real file a machine may already have. (ruff's user config applies
+# only when a project has no own ruff config.)
+for tool in rumdl ruff; do
+  if [ -f "$HOME/.claude/$tool.toml" ] && [ ! -e "$HOME/.config/$tool/$tool.toml" ]; then
+    mkdir -p "$HOME/.config/$tool"
+    ln -s "$HOME/.claude/$tool.toml" "$HOME/.config/$tool/$tool.toml"
+  fi
+done
 
 exit 0

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""PreToolUse(Bash) guard: restrict the sync-pusher subagent to sync.sh save/push.
+"""PreToolUse(Bash) guard: restrict sync-pusher to sync.sh save/push.
 
-The sync-pusher agent (~/.claude/agents/sync-pusher.md, tools: Bash, Read) exists
-only to run `sync.sh save`/`push` and report; those two commands do all git
-add/commit/pull/push internally. Bash is its one write vector, so denying every
-other Bash command when agent_type == "sync-pusher" stops it editing settings.json
-/ the allowlist or hand-resolving a merge conflict - on any failure it is forced to
-stop and report to the user. Every other agent (incl. the main loop, where
-agent_type is absent) falls through untouched.
+The sync-pusher agent (~/.claude/agents/sync-pusher.md, tools: Bash, Read)
+exists only to run `sync.sh save`/`push` and report; those two commands do all
+git add/commit/pull/push internally. Bash is its one write vector, so denying
+every other Bash command when agent_type == "sync-pusher" stops it editing
+settings.json / the allowlist or hand-resolving a merge conflict - on any
+failure it is forced to stop and report to the user. Every other agent (incl.
+the main loop, where agent_type is absent) falls through untouched.
 """
 import json
 import sys
