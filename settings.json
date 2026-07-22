@@ -18,6 +18,7 @@
       "WebFetch(domain:arcinstitute.org)",
       "WebFetch(domain:www.biorxiv.org)",
       "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:docs.astral.sh)",
       "mcp__claude_ai_PDF_Viewer__list_pdfs",
       "mcp__claude_ai_PDF_Viewer__display_pdf",
       "mcp__claude_ai_alphaXiv__read_files_from_github_repository",
@@ -132,6 +133,8 @@
       "Bash(stat *)",
       "Bash(readlink *)",
       "Bash(wc *)",
+      "Bash(winget search *)",
+      "Bash(where.exe uv *)",
       "Bash(claude list-sessions *)",
       "Bash(claude mcp list*)",
       "Bash(claude mcp get *)",
@@ -268,7 +271,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
