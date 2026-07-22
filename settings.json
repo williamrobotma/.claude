@@ -192,7 +192,7 @@
       "/tmp"
     ]
   },
-  "model": "opus",
+  "model": "haiku",
   "hooks": {
     "PreToolUse": [
       {
