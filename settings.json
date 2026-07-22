@@ -192,7 +192,7 @@
       "/tmp"
     ]
   },
-  "model": "haiku",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
       {
@@ -274,7 +274,7 @@
       }
     }
   },
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
