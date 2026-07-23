@@ -51,18 +51,14 @@ if [ "$override_active" = 1 ] || [ -z "$ctx_pct" ]; then
     ctx_pct=$(awk "BEGIN { printf \"%.1f\", ($used_tokens / $ctx_max) * 100 }")
 fi
 
-# Compact k/M-notation for token counts. When both values share the same
-# unit suffix, only the denominator carries it (142/200k not 142k/200k).
+# Compact token counts: k is the floor unit (every value carries a suffix, so
+# 0 -> 0k, never a bare number), promoting to M at 999500 (where %.0f would
+# otherwise round to "1000k"). When both share a suffix only the denominator
+# carries it (142/200k not 142k/200k).
 fmt_token_pair() {
-  # Cutovers sit at 999500 / 999.5 (not 1e6 / 1000) so a value that %.0f would
-  # round up to "1000k"/"1000" promotes to the next unit ("1M"/"1k") instead.
   awk -v a="$1" -v b="$2" 'BEGIN {
-    if (b >= 999500) { bs = "M"; bd = b / 1000000 }
-    else if (b >= 999.5) { bs = "k"; bd = b / 1000 }
-    else { bs = ""; bd = b }
-    if (a >= 999500) { as = "M"; ad = a / 1000000 }
-    else if (a >= 999.5) { as = "k"; ad = a / 1000 }
-    else { as = ""; ad = a }
+    if (b >= 999500) { bs = "M"; bd = b / 1000000 } else { bs = "k"; bd = b / 1000 }
+    if (a >= 999500) { as = "M"; ad = a / 1000000 } else { as = "k"; ad = a / 1000 }
     if (as == bs) printf "%.0f/%.0f%s", ad, bd, bs
     else printf "%.0f%s/%.0f%s", ad, as, bd, bs
   }'
