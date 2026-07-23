@@ -5,7 +5,7 @@ input=$(cat)
 
 user_host="$(whoami)@$(hostname -s)"
 
-IFS=$'\x1f' read -r cwd model effort used_tokens ctx_max five_h seven_d <<< "$(printf '%s' "$input" | python3 -c '
+IFS=$'\x1f' read -r cwd model effort used_tokens ctx_max used_pct five_h seven_d <<< "$(printf '%s' "$input" | python3 -c '
 import json, sys
 d = json.load(sys.stdin)
 def g(*keys):                       # nested lookup; missing/None -> "" (matches jq join of nulls)
@@ -20,6 +20,7 @@ print("\x1f".join([
     g("effort", "level"),
     g("context_window", "total_input_tokens"),
     g("context_window", "context_window_size"),
+    g("context_window", "used_percentage"),
     g("rate_limits", "five_hour", "used_percentage"),
     g("rate_limits", "seven_day", "used_percentage"),
 ]))
@@ -27,13 +28,19 @@ print("\x1f".join([
 
 # Use CLAUDE_CODE_MAX_CONTEXT_TOKENS (custom limit) if set and smaller than
 # Claude Code's reported max_tokens; otherwise fall back to max_tokens.
+override_active=0
 if [ -n "${CLAUDE_CODE_MAX_CONTEXT_TOKENS:-}" ] && [ "${CLAUDE_CODE_MAX_CONTEXT_TOKENS:-0}" -lt "${ctx_max:-0}" ] 2>/dev/null; then
   ctx_max="${CLAUDE_CODE_MAX_CONTEXT_TOKENS}"
+  override_active=1
 fi
 
 ctx_pct=""
-[ -n "$used_tokens" ] && [ -n "$ctx_max" ] && [ "$ctx_max" != "0" ] && \
-  ctx_pct=$(awk "BEGIN { printf \"%.1f\", ($used_tokens / $ctx_max) * 100 }")
+if [ "$override_active" = 1 ]; then
+  [ -n "$used_tokens" ] && [ -n "$ctx_max" ] && [ "$ctx_max" != "0" ] && \
+    ctx_pct=$(awk "BEGIN { printf \"%.1f\", ($used_tokens / $ctx_max) * 100 }")
+else
+  ctx_pct="$used_pct"
+fi
 
 dir_name="${cwd##*/}"
 branch="$(git -C "$cwd" branch --show-current 2>/dev/null)"
