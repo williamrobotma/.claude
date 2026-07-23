@@ -194,7 +194,7 @@
       "/tmp"
     ]
   },
-  "model": "claude-opus-4-6",
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -281,7 +281,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
