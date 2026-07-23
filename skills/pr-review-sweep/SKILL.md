@@ -16,8 +16,9 @@ Fan out several independent, report-only reviews on a PR, vet what they find, th
 
 1. Land the PR: branch off the default branch if needed, commit, push, `gh pr create`; target an existing PR if there is one.
 2. Pick lenses to fit the diff. Default set: `/review`, `/simplify` (report-only), `security-review`, `auditing-permission-scope`.
-3. Add any lens the diff warrants; for a lens with no real surface, run it anyway and record the null - never skip silently.
+3. Add any lens the diff warrants. No surface? Check it inline and record the null - don't spawn an agent.
 4. Fan out in parallel: one subagent per lens, each in its own worktree, each told "no edits, findings only", each given the same PR context and a fixed return format.
+   - Pick each subagent's model with the `delegation` skill.
 5. Vet every finding against the diff: confirm it cites a real `file:line` and reproduces; drop the hallucinated or out-of-scope ones.
 6. Report once: severity-ranked findings, fixes grouped must-fix / optional / nit, plus what came back clean.
 7. Confirm before touching anything: let the user pick which tiers to apply.

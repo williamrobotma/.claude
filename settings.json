@@ -222,6 +222,10 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/glyph-check.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/rumdl-md-check.py"
           }
         ]
       }

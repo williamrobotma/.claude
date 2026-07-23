@@ -65,17 +65,22 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 
 ## Delegation
 
-- Match subagent to task: `scout` (haiku) to locate things, `mechanic` (sonnet) for well-specified mechanical edits; judgment work stays in the main loop or inherits the session model.
-- Price a workflow/harness before invoking: agent count x model (agents inherit the session model unless overridden). Mostly-answered question -> finish inline; legwork stages (search/fetch/verify) go to cheap models.
+- Before spawning any agent or workflow, use the `delegation` skill.
+- Price first: agent count x model. Agents inherit the session model unless overridden.
+- `scout` (haiku) finds things; `mechanic` (sonnet) makes mechanical edits. Neither reviews or judges.
 - A scout's "not found" is a lead, not a conclusion (rule 2).
 
 ## Writing
 
-- Basic keyboard symbols only in chat, code, commits, and .md prose: `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot (a hook enforces the .md part).
+- Basic keyboard symbols only in chat, code, commits, and .md prose: `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot (hooks enforce glyphs and the 120-col barometer for .md).
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
-- Concise = dense per word, not fewer lines: split multiple ideas into sub-bullets, don't cram them onto one line (all .md).
+- Concise = dense per word: cut redundancy first, then split multi-idea lines into sub-bullets (all .md).
+  - Never split a single idea to pass a length limit.
+  - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
 - Chat: bullets/tables over paragraphs.
 - Clarity outranks convention: plain technical language in clear, logical points; no verbose prose, no jargon.
+  - Name the thing in its idiomatic term, then give two or three concrete examples.
+  - Pair every don't with a do: "use bun, not npm".
 - Stable references: once a thing is named, keep the exact name (no spec -> task -> job drift); when updating a recurring output (table, plan), keep its structure and order stable - update contents, don't reshuffle, rename, or drop elements.
 - Rewriting existing text: preserve its information; flag anything added or dropped.
 - Cross-source analysis: open by defining each shared term and how it diverges from the source's usage; one meaning per term, held document-wide - don't use domain terms interchangeably.
