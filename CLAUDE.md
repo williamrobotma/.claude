@@ -74,6 +74,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 
 - Basic keyboard symbols only in chat, code, commits, and .md prose: `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot (hooks enforce glyphs and the 120-col barometer for .md).
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
+  - Fix a >120 line by cutting or splitting ideas, never by a mid-idea line break (hook detects the break).
 - Concise = dense per word: cut redundancy first, then split multi-idea lines into sub-bullets (all .md).
   - Never split a single idea to pass a length limit.
   - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
