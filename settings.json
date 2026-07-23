@@ -140,6 +140,8 @@
       "Bash(git check-ignore *)",
       "Bash(bash ~/.claude/sync.sh save)",
       "Bash(bash ~/.claude/sync.sh push)",
+      "Bash(tail -20 ~/.claude/sync.log)",
+      "Bash(tail -10 ~/.claude/sync.log)",
       "Skill(hookify:hookify)",
       "Skill(hookify:hookify:*)"
     ],
