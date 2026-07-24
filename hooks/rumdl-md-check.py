@@ -12,33 +12,36 @@ if not path.endswith(".md"):
     sys.exit(0)
 
 rumdl = os.path.expanduser("~/.local/bin/rumdl")
-r = subprocess.run([rumdl, "check", "-e", "MD013", path], capture_output=True, text=True)
+r = subprocess.run(
+    [rumdl, "check", "-e", "MD013", "--output-format", "json", path],
+    capture_output=True, text=True,
+)
 if r.returncode == 0:
     sys.exit(0)
 
-# Scope to lines this edit introduced: keep a hit only if that file line's text
-# was part of new_string / content. No git, no line arithmetic; an added line
-# identical to one elsewhere over-reports, which is harmless.
+try:
+    warnings = json.loads(r.stdout)
+except json.JSONDecodeError:
+    warnings = None  # unexpected output -> fail loud below, don't skip silently
+
+# Scope to lines this edit introduced: keep a warning only if that file line's
+# text was part of new_string / content. A line the edit didn't touch is not
+# ours to nag about. A dup of a line elsewhere over-reports, which is harmless.
 changed = ti.get("new_string", ti.get("content"))
-if changed is not None:
+if warnings is not None and changed is not None:
     added = set(changed.splitlines())
     with open(path, encoding="utf-8") as f:
         lines = f.read().splitlines()
     kept = []
-    for out in r.stdout.splitlines():
-        if not out.startswith(path + ":"):
-            continue
-        try:
-            n = int(out[len(path) + 1:].split(":", 1)[0])
-        except ValueError:
-            continue
+    for w in warnings:
+        n = w["line"]
         if 1 <= n <= len(lines) and lines[n - 1] in added:
-            kept.append(out)
+            kept.append(f"{path}:{n}:{w['column']}: {w['message']}")
     if not kept:
         sys.exit(0)
     report = "\n".join(kept)
 else:
-    report = r.stdout  # unexpected tool_input shape -> report all, don't skip silently
+    report = r.stdout + r.stderr  # unexpected shape -> report all, don't skip
 
 print(report, file=sys.stderr)
 print(
