@@ -46,7 +46,8 @@ The minimum that solves the problem; nothing speculative.
 - No features, abstractions, config, or defensive code beyond what's needed.
   - It adds complexity and hides the real behavior.
   - Validate only at trust boundaries (user input, external APIs); security and data-loss handling are never the cut.
-- Fail visibly and predictably: never silently change behavior or swallow a bad state - it drifts out-of-spec and undiagnosable.
+- Fail visibly and predictably: never silently change behavior or swallow a bad state.
+  - It drifts out-of-spec and undiagnosable.
   - Add a proactive warning/flag only where the signal must not be lost.
 - 200 lines that could be 50 -> rewrite it. If a rule needs layers to explain, simplify the behavior.
 
@@ -110,7 +111,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 ## Git
 
 - Commits: wrapped-up work only - no junk or half-finished edits; long-task commits include the handoff/status doc.
-  - At wrap-up, offer the commit (proposed message) rather than leaving finished work for auto-save to swallow unlabeled.
+  - At wrap-up, offer the commit (proposed message) rather than leaving work for auto-save to swallow unlabeled.
   - Push only on explicit request.
 - Durability: keep durable state in git-tracked files (rules, long-task state), never chat-only.
   - A resume-point (stage / done / next) lets a fresh session continue after /clear or /compact.

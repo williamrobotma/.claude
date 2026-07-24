@@ -9,6 +9,8 @@ paths:
 - Idiomatic, pythonic code: clear standard constructs over hand-rolled or clever equivalents; keep the main path boringly explicit.
   - e.g. `==` not `.equals`; `with` for resources; no needless nesting.
 - Any check the code depends on is a `raise`, never an `assert` - `-O` deletes asserts, so an assert must be deletable too (pytest excepted). Never quietly return/skip on a bad state.
+- Don't guard an error you can't fix - let it traceback (fail visibly).
+  - A try/except that only re-reports, with no real recovery, buries the trace and adds complexity.
 - Explicit over implicit: behavior that differs by caller -> a named keyword (`paths_only=True`), not `hasattr`/presence checks.
 - Prefer covariant hints (`Sequence`/`Iterable`) over invariant `list`/`Tuple` on public signatures.
 - Docstrings/comments: Google style, wrap 80 (Python only).
