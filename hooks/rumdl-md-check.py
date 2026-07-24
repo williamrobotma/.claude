@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""PostToolUse: rumdl MD013 on an edited .md, scoped to added lines."""
+"""PostToolUse: rumdl MD013 on an edited .md, scoped to added lines.
+
+Exit 2 (feedback on stderr) when a line this edit added exceeds 120 cols.
+"""
 import json
 import os
 import subprocess
