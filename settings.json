@@ -194,7 +194,7 @@
       "/tmp"
     ]
   },
-  "model": "fable",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -281,8 +281,7 @@
       }
     }
   },
-  "effortLevel": "high",
-  "advisorModel": "opus",
+  "effortLevel": "xhigh",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
