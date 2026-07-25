@@ -8,6 +8,10 @@ This file is AI-written - every commit on it carries `Co-Authored-By: Claude Opu
 - Origin: a read-only audit of `~/.claude`, the five `~/Developer` repos, and the Windows clone (2026-07-24).
 - A verification pass on 2026-07-25 re-checked most claims at the source. Corrections are folded in below.
 - Claims that pass unchecked are tagged UNVERIFIED. See "Verification status" for what was never reached.
+- **Status: Phase 1b is done and Phase 2's in-file part is decided. A PR into `master` is open for review.**
+  - Resume at Phase 2's uninstalls, or Phase 3, or Phase 4. Phase 1b is kept only for its corrections.
+  - Two of this doc's own claims were **refuted** on 2026-07-25 - the awk-guard regression and the Phase 2
+    headline. Both are marked in place. Treat the remaining unexecuted claims with the same suspicion.
 
 ## Orchestration
 
@@ -32,6 +36,8 @@ You are the orchestrator.
 - **The orchestrator presents every gated diff.** A subagent's approval is not the user's approval.
 - **Report per phase**: what changed, the verification command and its output, and what you left.
 - **Do not merge `audit/phase1-fixes`.** It is under review; base new config work on it, not on master.
+  - Still in force. A PR was opened on 2026-07-25 so the review has a surface; opening it is not merging it.
+  - The branch now contains master (`37a9a97`), so it is no longer behind.
 
 ## Decisions already made
 
@@ -66,6 +72,19 @@ Recorded, not immune. Each carries the strength of its own evidence; re-open any
   - It is live in exactly one place, `ollama-modelfiles`. The `diffusion-scratch` entry is already inert.
   - Treat as a one-way deletion needing approval, not a closed decision.
 
+Added 2026-07-25, during the Phase 1b session:
+
+- **Consent: gate the irreversible only.** Reversible edits inside this worktree proceed without asking; the
+  stops are file/dir deletion, plugin uninstall, any edit outside this worktree, and `git push`.
+  - This relaxes the "once per phase" clause above, by user decision, for in-branch work only.
+  - The permissions diff was still presented before it was applied, because the doc gated that one by name.
+- **Scope of the PR: this repo only.** Phase 1b plus the parts of Phase 2 that live in tracked `settings.json`.
+  - Phases 3 and 4 and the plugin uninstalls are out of it - a PR into this `master` cannot carry them.
+- **`sync.sh` autosave collapsing: rejected.** Read-time filtering only. Per-session author dates are worth more
+  than a shorter `git log`, and the flock is a separate, real bug fix that landed on its own merits.
+- **`additionalDirectories` stays `/tmp`.** The narrowing was verified real but not worth the friction.
+- **`Read(//proc/**)` and the `dmesg` gap: fix, do not just flag.** Both were found outside the original audit.
+
 ## Done
 
 **Phase 0 - this machine** (no repo edits):
@@ -92,11 +111,17 @@ Recorded, not immune. Each carries the strength of its own evidence; re-open any
 Hooks:
 
 - awk-guard now lexes per line. The newline bypass is closed, verified end-to-end.
-  - **Regression, undocumented until now**: a backslash-continuation now raises `ValueError`, swallowed at
-    `hooks/awk-guard.py:57-58`, so `cat f |\` + newline + `awk '...'` falls through where master denied it.
-  - Bounded, not silent: no awk allow rule exists and `defaultMode` is `default`, so fall-through means a prompt.
-  - New false deny: a heredoc body that merely mentions awk is now denied.
-  - Still open and not disclaimed: `/usr/bin/awk` (absolute path) and backtick substitution both bypass it.
+  - **The claimed backslash-continuation regression does not exist.** Corrected 2026-07-25 by running both versions.
+    - Master lexes `cat f |\` + newline + `awk '...'` to `['cat', '\nawk']`, which matches no awk name - so master
+      did **not** deny it either. The branch raises `ValueError` and falls through. Same outcome, different route.
+    - It is a pre-existing bypass shared by both, not a regression, and not a merge blocker. The `ValueError`
+      catch is itself pre-existing - it sits at `hooks/awk-guard.py:46-49` on master.
+  - The false deny was real but narrower than stated: a heredoc body line that *starts with* `awk` was denied;
+    one that merely mentions awk mid-line was not. **Fixed** in `28545ce` by skipping heredoc bodies.
+    - The skip only fires when the closing delimiter is really present, so a stray match cannot swallow a real
+      `awk` that follows. A 10-case suite covers it, including "real awk after a heredoc" and "arith shift then awk".
+  - Still open and disclaimed here: `/usr/bin/awk` (absolute path) and backtick substitution both bypass it.
+    Both were confirmed open on master and on the branch - the guard is best-effort against a cooperative model.
 - rumdl-md-check subtracts `old_string`, so unchanged Edit context stops re-flagging. Verified.
   - Known limit: the subtraction is text-based, not positional, so duplicating an existing >120-col line is exempt.
 - Both linters resolve via PATH with a `~/.local/bin` fallback and print a one-line install pointer.
@@ -104,6 +129,11 @@ Hooks:
     still fails open toward the agent: loud to the user, silent to Claude.
 - **Fourth change, not previously listed**: `rumdl-md-check.py:12-15` added a `json.load` try/except that
   exits 0 on malformed stdin. That is the silent-swallow `rules/python.md:12` warns against. Drop or document it.
+  - **Dropped** in `28545ce`; malformed stdin now tracebacks. Exit 0 there means "lint passed", so the swallow
+    silently reported clean.
+  - The doc's inconsistency, noted: `awk-guard.py` has the byte-identical pattern on **master** and was not
+    flagged. It is defensible to keep - exit 0 there means "no decision", so the command still hits the normal
+    prompt - but the doc never said so. Left alone as adjacent code.
 
 Instructions:
 
@@ -117,99 +147,111 @@ Instructions:
   - Spawn counts reproduced exactly across 761 transcripts. Keep the deletions.
   - The stated cause ("the harness auto-delegates search to the built-in Explore") is the doc's own inference.
   - **Dangling reference to fix before merge**: `skills/pr-review-sweep/SKILL.md:21` still says
-    "Pick each subagent's model with the `delegation` skill."
+    "Pick each subagent's model with the `delegation` skill." **Fixed** in `6d13a60` - it now points at the
+    CLAUDE.md Delegation tiers, which put review on opus.
 - `rules/settings-scope.md`: `paths` narrowed. The doc misquoted its own change - there is no `settings*.json`
   glob. It is two exact patterns: `**/.claude/settings.json` and `**/.claude/settings.local.json`.
 - `README.md`: dropped the `InstructionsLoaded` hook pointer. **This was wrong - the hook is real.**
-  - 27 references in the v2.1.219 binary, including the payload builder. Restore the pointer.
+  - 27 references in the v2.1.219 binary, including the payload builder. **Restored** in `6d13a60`.
+  - Re-confirmed at the source: `hook_event_name:v.literal("InstructionsLoaded")`, `executeInstructionsLoadedHooks`,
+    `hasInstructionsLoadedHook`, and an `InstructionsLoaded:[]` slot in the hook registry object.
   - It is also the one read-only probe that would settle the `settings-scope.md` glob claim empirically.
 - `.gitignore`: added `!docs/` and `!docs/*.md` in `f782c14`. Previously undocumented here.
 
+**Phase 1b - config repo finished**, same branch, 2026-07-25. Three commits, plus the merge of master.
+
+- **Step 0, the trap in old step 1**: master (`37a9a97`) merged into the branch *first*. Confirmed it mattered -
+  the branch's `settings.json` really did carry `"model": "fable"` and `"advisorModel": "opus"`.
+  - Verified after: `model` is `opus`, `advisorModel` absent. Phase 0 survived.
+- **Permissions** (`077ed83`): allow 138 -> 137, deny 42 -> 27. Far short of the ~112 target - see the correction
+  under Phase 1b step 1 below for why most of the claimed dead allows are not dead.
+- **Sync noise** (`6d13a60`): read-time only, per the user's 2026-07-25 choice. Zero lines in `sync.sh`'s commit
+  path; the README documents `git log --invert-grep --grep='^auto-save '`. Autosaves keep their per-session dates.
+- **The `sync.sh` race** (`6d13a60`): one `flock` on `.git/sync.lock` around the whole run, capped at 30s.
+  - Reproduced before fixing: 8 concurrent saves give 2 races on master, 0 on the branch.
+- **Pending-push visibility** (`6d13a60`): new `sync.sh status`, wired to `SessionStart`.
+  - Threshold is `>= 5` unpushed, not `> 0`. The doc's step 3 contradicted itself here - its *Verify* line asked
+    for an indicator at 2, its body said `ahead > 0` is the steady state so an unconditional one says nothing.
+    Resolved toward the threshold, picked from the live distribution: 1-3 ahead is 147 of 229 saves.
+  - No upstream prints its own marker, never a count of 0. `commit_pending` now logs an explicit FAILED note,
+    which covers the failed-commit symptom an ahead count cannot.
+- **Hooks** (`28545ce`): awk-guard heredoc false deny fixed; `rumdl-md-check` silent swallow dropped.
+- Verification: 10-case awk suite, 12-case sync suite against a throwaway `HOME`, `ruff check hooks/` clean,
+  no new `rumdl` findings, `settings.json` parses. Live `~/.claude` was never written to.
+
 ## Next up
 
-### Phase 1b - finish the config repo (same branch)
+### Phase 1b - superseded, kept for its corrections
 
-1. **Permissions** (`settings.json`; use the `auditing-permission-scope` skill). Gated: propose the full diff and
-   the prompts it will cost. 138 allows -> ~112, 42 denies -> ~24. Baseline counts confirmed live.
-   - **Do this first: bring the branch up to master, or hand-edit only the `permissions` block.**
-     The branch's `settings.json` predates Phase 0. A wholesale rewrite reintroduces `"model": "fable"` and
-     `"advisorModel": "opus"` and silently undoes Phase 0. The merge driver is the only thing that would catch it.
-   - Delete `Bash(curl -I *)` / `Bash(curl --head *)` - a HEAD request reaches any host with the full URL,
-     bypassing the WebFetch domain allowlist. UNVERIFIED: check whether other allowed curl forms do the same.
-   - Replace `Bash(nvidia-smi *)` with read-only forms (`-q`, `--query*`, `-L`, `dmon`, `topo`), then delete the
-     17 nvidia-smi denies - they are literal prefixes, so a reordered flag slips past all of them.
-     UNVERIFIED: the bypass was never demonstrated, and whether the risky calls need root was never checked.
-   - `additionalDirectories`: `/tmp` -> `/tmp/claude-1000`. UNVERIFIED: owner and mode were never confirmed.
-   - Add `Read(~/.cache/huggingface/token)`; widen the `.env` denies to `.env*`. UNVERIFIED: file and mode.
-   - Drop the dead allows: duplicates of the built-in read-only set, exact+wildcard twins, and the Windows-era
-     `winget` / `where.exe` rules. UNVERIFIED: never enumerated. Expect fewer than the ~20 claimed.
-   - Move the 8 single-project research WebFetch domains to the owning repo's settings. UNVERIFIED: not listed.
-   - *Verify*: JSON parses; `"model"` is still `opus` and `advisorModel` still absent; run one ordinary session
-     and note which prompts return. Expect a prompt on non-query nvidia-smi.
-2. **Sync noise** (`sync.sh`). Auto-save commits are 149 of 238 on master (63%).
-   - The premise "buries labeled work" is a judgment, not a measurement. Weigh the read-time fix first.
-   - **Cheapest option, zero lines in `sync.sh`**: read history with
-     `git log --oneline --invert-grep --grep='^auto-save '`. This solves the stated symptom with no rewriting.
-   - If collapsing is still wanted, do it in `push`, not `save` - the user is present and the commits are
-     provably unpushed.
-   - If it stays in `save`, the amend must be `git commit --amend --no-edit`. **Plain `--amend` opens an editor**;
-     SessionEnd has no TTY and the failure is swallowed, so autosave would silently stop committing.
-   - Gate on the `ahead` count `sync.sh:63` already computes, plus the subject prefix, plus no `.git/MERGE_HEAD`.
-   - Correct the claim before implementing: it caps noise at one autosave **per consecutive run**, not per push
-     cycle. On observed history one cycle goes 9 -> 3, not 9 -> 1.
-   - "Never rewrites pushed history" is an assumption, not a guarantee: `save` never fetches, and `@{u}` is two
-     days stale right now. Staleness errs safe, but default to no-amend when `@{u}` fails to resolve.
-   - `sync.sh` has no lock. Two races are already in `sync.log` (`:125` index.lock, `:208` HEAD ref CAS).
-     One `flock` on `$repo/.git/sync.lock` around `commit_pending` closes both, pre-existing and new.
-   - Cost to accept: two sessions' snapshots collapse into one commit, under the earlier one's author date,
-     so "which session changed this" stops being answerable.
-   - *Verify*: two consecutive SessionEnd saves produce one commit; a save after a push produces a new one;
-     a save while `MERGE_HEAD` exists still commits; two overlapping saves lose nothing.
-3. **Pending-push visibility.** `save` always exits 0 by design, so a failed commit or a multi-day backlog is
-   invisible in-session. Confirmed: a ~5.7-day backlog and two swallowed races are in `sync.log`.
-   - The work is **surfacing, not computing**: `sync.sh:63` already produces the exact number.
-   - "The statusline already parses state cheaply" is **wrong**. It has one git call, `$cwd`-scoped, no caching.
-     An ahead-count needs a new subprocess hard-coded to `-C "$HOME/.claude"`.
-   - Cost is fine either way: +1.79ms on a 35.27ms render, at `refreshInterval: 30`.
-   - **Recommended surface: a SessionStart note, not the statusline.** It fires once, when the backlog is
-     actionable, costs nothing per render, and reuses `sync.sh`'s own computation.
-   - Needs a threshold whichever surface wins: `ahead > 0` is the steady state (220 of 261 log lines), so an
-     unconditional indicator says nothing. Follow the existing rate-limit band at `statusline-command.sh:105-106`.
-   - Two traps: do not reuse `$cwd`; and do not collapse "no upstream" to 0 - this very worktree has no upstream,
-     so `2>/dev/null || echo 0` would report "nothing pending" while 2 commits sit unpushed.
-   - An ahead-count does **not** cover the failed-commit symptom - a failed commit leaves the count flat.
-     That needs a dirty-tree indicator or a failure note in `commit_pending`.
-   - *Verify*: with 2 unpushed commits the indicator shows 2; with 0 it is absent; with no upstream it shows a
-     distinct marker rather than 0.
-4. **Merge**: fix the `pr-review-sweep` dangling reference and decide the awk-guard regression first.
-   Then review the branch, merge to master, restart one session, then `/sync-push`.
+Steps 1-3 are done and recorded above. What remains here is the record of what the original text got wrong.
+
+1. **Permissions** - done in `077ed83`. The 2026-07-25 pass checked every UNVERIFIED premise; results:
+   - **The ~112 allow target was not reachable on evidence.** Landed at 137. The "~20 dead allows" were never
+     enumerated because most are not dead.
+   - Confirmed and applied: the curl reach (the Claude Code permissions doc recommends exactly this fix), the
+     nvidia-smi prefix-anchor bypass, the hf token file (exists, mode 644), the `.env*` widening.
+     - `nvidia-smi --help` says "Requires root." for the risky flags, so the 17 denies were near-dead weight
+       on top of being bypassable.
+   - Only `du`, `stat`, `wc` are genuinely redundant with the built-in read-only set. The docs name that set
+     as `ls cat echo pwd head tail grep find wc which diff stat du cd` plus "read-only forms of `git`".
+   - Exact+wildcard twins **are** redundant, now confirmed: `Bash(cmd *)` "requires the prefix to be followed
+     by a space **or end-of-string**". Three dropped.
+   - **`winget` / `where.exe` are not dead.** Phase 3 records Windows in regular use and this `settings.json`
+     syncs there. Deleting them removes live capability. Kept - this corrects the original instruction.
+   - The 13 read-only `git` allows are kept. "Read-only forms of `git`" is never enumerated in the docs, and
+     `git -C` collides with the documented `cd`+`git` prompt rule. Unverifiable, and git is the hottest path.
+   - `additionalDirectories` left at `/tmp` by user decision, 2026-07-25. The narrowing was real (`/tmp` is
+     root-owned 1777, `/tmp/claude-1000` is wma-owned 700) but ~20 loose prior-session artifacts live in `/tmp`.
+   - The 8 research WebFetch domains are **still in global** - relocation is gated, see Phase 4.
+   - **Two defects the original audit missed, both fixed**: `dmesg` has the identical prefix-anchor gap (and its
+     deny list never covered `-D`/`-E`/`-n`/`-S` at all); `Read(//proc/**)` exposed `/proc/<pid>/environ`.
+     - The `/proc` fix had to be a **deny**, not a narrowed allow: `cat` is in the built-in read-only set and
+       runs with no prompt regardless of the allow, so only a deny reaches it.
+     - Cost checked first: no transcript contains a Read-tool or `cat`/`head`/`tail`/`sed` read of `/proc`.
+2. **Sync noise** - done in `6d13a60`, read-time only. Live count re-checked: 150 of 239 on master (62%).
+   - The collapsing options (amend in `save` or in `push`) were **not** built. Per-session author dates survive,
+     which is what the doc named as the cost of collapsing.
+   - The `flock` was built, and it went around the **whole run**, not just `commit_pending`. Locking only
+     `commit_pending` leaves a `save` racing a `push`'s pull, which is one of the two shapes already in the log.
+3. **Pending-push visibility** - done in `6d13a60` as a `SessionStart` note, the recommended surface.
+   - Both named traps avoided: it is hard-coded to `-C "$HOME/.claude"`, and a missing upstream gets its own
+     marker instead of collapsing to 0.
+   - The failed-commit gap is closed by a note in `commit_pending`, the doc's own second option.
+   - `statusline-command.sh` was therefore never touched, so the arrow glyph at `:101` is still open below.
+4. **Merge** - both pre-merge blockers cleared: the `pr-review-sweep` reference is fixed, and the awk-guard
+   "regression" turned out not to exist. A PR into `master` is open for review. **Merging is the user's call.**
 
 ### Phase 2 - plugins
 
-Most "enabled" plugins never load where the work happens: 9 `enabledPlugins: true` entries exist, and 8 are
-installed only at project scope for `/mnt/c/Users/mawil` (the Windows home).
+**This phase's headline premise is REFUTED.** Checked 2026-07-25 by running `claude plugin list` in a WSL cwd,
+the exact check the doc itself demanded. Nothing here was removed.
 
-- Remove the `enabledPlugins` entries that cannot load here: claude-code-setup, claude-md-management, code-review,
-  commit-commands, context7, feature-dev, pyright-lsp, skill-creator.
-  - The enumeration is confirmed. The **inference is not** - "cannot load here" was checked only for context7.
-  - Verify per plugin with `claude plugin list` in a real cwd before deleting its entry. It prints
-    an explicit enabled/failed-to-load status per record. Removing a live capability is the failure mode here.
-  - Check `/code-review` before removing that entry - it may be a built-in rather than the plugin.
+- ~~Remove the 8 `enabledPlugins` entries that cannot load here.~~ **All 8 report `Status: enabled`.**
+  - claude-code-setup, claude-md-management, code-review, commit-commands, context7, feature-dev, pyright-lsp
+    and skill-creator all load in `/home/wma/.claude-audit-wt`. Removing them would have dropped live capability -
+    exactly the failure mode the doc flagged one line after making the claim.
+  - The *enumeration* was right: `installed_plugins.json` really does record `projectPath: /mnt/c/Users/mawil`
+    for them. The *inference* from that to "cannot load here" is what fails - the install cache itself lives at
+    `~/.claude/plugins/cache/`, a Linux path, and the user-scope `enabledPlugins` turns them on everywhere.
+  - What a genuine failure looks like, for contrast: superpowers prints
+    `Status: failed to load` / `enabled in project settings but isn't installed`. None of the 8 look like that.
+  - Lesson for the rest of this doc: an install record's `projectPath` is not evidence about where a plugin loads.
 - Uninstall superpowers (both install records, 3.9M) and remove the superpowers line from
   `ollama-modelfiles/.claude/settings.json` and `diffusion-scratch/.claude/settings.json`.
   - **Delete only the superpowers line, not the block.** `diffusion-scratch`'s block holds 7 entries; deleting it
     removes feature-dev, four life-sciences plugins and security-guidance as collateral.
   - `ollama-modelfiles`'s file *is* the block - decide whether it becomes `{}` or is deleted, before Phase 4.
   - The real win is one SessionStart hook and 14 skill descriptions, not disk.
-- hookify: it loads every session and spawns python3 on four hook events, but no `hookify.*.local.md` rule file
-  exists anywhere - it evaluates nothing, confirmed by execution returning `{}`.
-  - Measured cost of keeping it: **+88ms per tool call** (PreToolUse 53ms + PostToolUse 35ms) for a guaranteed
-    `{}`, plus ~124 tokens and 5 skill-listing slots in every context, plus 2.9M.
-  - For scale, the user's own five hooks total 171ms per tool call, so this is a 51% increase.
+- hookify - **disabled in `077ed83`.** Every premise re-checked at the source first; all held.
+  - No `hookify.*.local.md` exists anywhere under `/home/wma` or `/mnt/c/Users/mawil`, so it evaluates nothing.
+    Both hooks were executed directly and returned `{}`.
+  - It registers four events (PreToolUse, PostToolUse, Stop, UserPromptSubmit) and occupies 5 skill-listing slots.
+  - **Re-measured cost: 59ms per tool call** (PreToolUse 30ms + PostToolUse 29ms), not the 88ms recorded here.
+    Provenance: 20 reps, one WSL2 host, single run - same caveat as the original figure. Ordering is what matters.
   - The rule glob is cwd-relative (`.claude/hookify.*.local.md`), so "write the rules" can only ever give
     per-project coverage, never a global guardrail.
-  - **Recommend disable**, even under curated prune: the component provably does nothing and the cost is measured.
-    It is fully reversible - `settings.json` is tracked and the marketplace is a git URL.
+  - Reversible: `settings.json` is tracked and the marketplace is a git URL. The two `Skill(hookify:hookify*)`
+    allows were deliberately left in place so re-enabling does not need a re-grant.
 - Optional reinstalls at **user** scope: `pyright-lsp` costs 0 always-on tokens and 28K, so it is a plain
   want/do-not-want question (needs `pyright` installed first; it is not on PATH).
   - Skip `skill-creator` unless the superpowers `writing-skills` gap matters - it costs 117 always-on tokens.
@@ -291,6 +333,17 @@ clone is also 17 commits behind with no automatic pull anywhere.
 A 2026-07-25 pass checked the doc's claims at the source. It was stopped early on cost grounds, so coverage is
 uneven and named here rather than assumed.
 
+A second pass on 2026-07-25 executed Phase 1b and closed most of the gap the first pass left.
+
+- **Now checked at the source, corrections folded in above**: the whole Phase 1b step 1 permissions detail
+  (against the live Claude Code permissions doc, not memory), the Phase 1 awk and rumdl claims (by running both
+  versions), the `InstructionsLoaded` claim (in the binary), and the Phase 2 plugin-load premise (by
+  `claude plugin list`). Two of these came back **refuted** - see the awk regression and the Phase 2 headline.
+- **Still never reached**: all of Phase 3, and the pricing and advisor-behavior claims under "Decisions already
+  made". Phase 4 keeps the first pass's coverage; nothing in it was executed.
+
+Superseded by the above, kept so the coverage history reads straight:
+
 - **Checked, corrections folded in above**: Phase 0, Phase 1 hooks, Phase 1 instructions, Phase 1b steps 2 and 3,
   Phase 2, Phase 4, the posture fork, and intent-consistency against CLAUDE.md.
 - **Never reached, still inherited from the original audit**: the Phase 1b step 1 permissions detail (beyond the
@@ -304,8 +357,12 @@ uneven and named here rather than assumed.
 
 - The two >120-col lines in `rules/settings-scope.md` predate this work and were left alone per "leave untouched
   text unrewrapped". They will re-nag on any full-file Write. Fix or annotate when next editing that file.
-- `statusline-command.sh:101` embeds a literal arrow glyph, against the CLAUDE.md Writing rule. Phase 1b step 3
-  edits that file, so that is the natural moment - or leave it and note it.
+- `statusline-command.sh:101` embeds a literal arrow glyph, against the CLAUDE.md Writing rule. Still open:
+  step 3 shipped as a `SessionStart` note instead, so that file was never touched and the natural moment passed.
+- The 8 research WebFetch domains are still in global `settings.json`. The user chose to relocate them per repo
+  with the diff shown first, which makes it Phase 4 work on `diffusion-scratch`, outside this PR.
+- `Read(//proc/**)` was kept but earns nothing measurable: no transcript shows a Read-tool or `cat` read of
+  `/proc`. It is the denies that do the work now. Drop the allow on the next pass if it stays unused.
 - The API-level advisor table (`claude-api` skill) says a Fable executor accepts an Opus 5 advisor; the live
   Claude Code doc reportedly says it rejects one. Neither was checked. Claude Code's behavior governs here.
 - No published subscription multiplier for Fable exists. What is published: on Max, Fable is capped at 50% of
@@ -323,5 +380,7 @@ uneven and named here rather than assumed.
 - Pull with the app idle - a pull rewrites live config under any running session. Restart if `settings.json`
   changed.
 - Deletions of runtime state (daemon files, venvs, plugin caches) are one-way. Confirm before each.
-- `workflowSizeGuideline` is unset, so dynamic workflows default to a "fewer than 15 agents" guideline. It is
-  advisory only - nothing enforces it. Set it to `"small"` (<5) in `settings.json` if a harder default is wanted.
+- `workflowSizeGuideline` is now `"small"` (<5 agents), set by the user on 2026-07-25. Still advisory only.
+  - It is a session/config setting, not a tracked key in this repo's `settings.json`.
+- No agent or workflow was spawned for Phase 1b. Every step was a single-file edit or a single check, which the
+  Orchestration section already classified as inline work.
