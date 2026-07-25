@@ -241,9 +241,10 @@ the exact check the doc itself demanded. Nothing here was removed.
 
 - ~~Remove the 8 `enabledPlugins` entries that cannot load here.~~ **All 8 report `Status: enabled`.**
   - claude-code-setup, claude-md-management, code-review, commit-commands, context7, feature-dev, pyright-lsp
-    and skill-creator all load in `/home/wma/.claude-audit-wt`. Removing them would have dropped live capability -
+    and skill-creator all load in the review worktree (`~/.claude-audit-wt`). Removing them would have dropped
+    live capability -
     exactly the failure mode the doc flagged one line after making the claim.
-  - The *enumeration* was right: `installed_plugins.json` really does record `projectPath: /mnt/c/Users/mawil`
+  - The *enumeration* was right: `installed_plugins.json` really does record a `projectPath` under the Windows home
     for them. The *inference* from that to "cannot load here" is what fails - the install cache itself lives at
     `~/.claude/plugins/cache/`, a Linux path, and the user-scope `enabledPlugins` turns them on everywhere.
   - What a genuine failure looks like, for contrast: superpowers prints
@@ -256,7 +257,8 @@ the exact check the doc itself demanded. Nothing here was removed.
   - `ollama-modelfiles`'s file *is* the block - decide whether it becomes `{}` or is deleted, before Phase 4.
   - The real win is one SessionStart hook and 14 skill descriptions, not disk.
 - hookify - **disabled in `077ed83`.** Every premise re-checked at the source first; all held.
-  - No `hookify.*.local.md` exists anywhere under `/home/wma` or `/mnt/c/Users/mawil`, so it evaluates nothing.
+  - No `hookify.*.local.md` exists anywhere under either home directory - Linux or the Windows clone - so it
+    evaluates nothing.
     Both hooks were executed directly and returned `{}`.
   - It registers four events (PreToolUse, PostToolUse, Stop, UserPromptSubmit) and occupies 5 skill-listing slots.
   - **Re-measured cost: 59ms per tool call** (PreToolUse 30ms + PostToolUse 29ms), not the 88ms recorded here.
