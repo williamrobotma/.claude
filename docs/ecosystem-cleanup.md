@@ -208,6 +208,9 @@ Steps 1-3 are done and recorded above. What remains here is the record of what t
      - The `/proc` fix had to be a **deny**, not a narrowed allow: `cat` is in the built-in read-only set and
        runs with no prompt regardless of the allow, so only a deny reaches it.
      - Cost checked first: no transcript contains a Read-tool or `cat`/`head`/`tail`/`sed` read of `/proc`.
+     - On that evidence `Read(//proc/**)` was then **dropped too**, by user decision. allow 137 -> 136.
+       The five denies stay and still earn their place - they are what blocks `cat /proc/<pid>/environ`, which
+       the allow never governed in the first place.
 2. **Sync noise** - done in `6d13a60`, read-time only. Live count re-checked: 150 of 239 on master (62%).
    - The collapsing options (amend in `save` or in `push`) were **not** built. Per-session author dates survive,
      which is what the doc named as the cost of collapsing.
@@ -359,10 +362,8 @@ Superseded by the above, kept so the coverage history reads straight:
   text unrewrapped". They will re-nag on any full-file Write. Fix or annotate when next editing that file.
 - `statusline-command.sh:101` embeds a literal arrow glyph, against the CLAUDE.md Writing rule. Still open:
   step 3 shipped as a `SessionStart` note instead, so that file was never touched and the natural moment passed.
-- The 8 research WebFetch domains are still in global `settings.json`. The user chose to relocate them per repo
-  with the diff shown first, which makes it Phase 4 work on `diffusion-scratch`, outside this PR.
-- `Read(//proc/**)` was kept but earns nothing measurable: no transcript shows a Read-tool or `cat` read of
-  `/proc`. It is the denies that do the work now. Drop the allow on the next pass if it stays unused.
+- The 8 research WebFetch domains are still in global `settings.json`. Deferred by the user on 2026-07-25 -
+  relocation is Phase 4 work on `diffusion-scratch`, to be done with the diff shown first, outside this PR.
 - The API-level advisor table (`claude-api` skill) says a Fable executor accepts an Opus 5 advisor; the live
   Claude Code doc reportedly says it rejects one. Neither was checked. Claude Code's behavior governs here.
 - No published subscription multiplier for Fable exists. What is published: on Max, Fable is capped at 50% of

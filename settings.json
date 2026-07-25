@@ -35,7 +35,6 @@
       "Bash(parallel --version)",
       "Bash(tmux -V)",
       "Read(//home/wma/.claude/**)",
-      "Read(//proc/**)",
       "Bash(gh auth status)",
       "Bash(gh browse * --no-browser)",
       "Bash(gh issue list *)",
