@@ -18,6 +18,29 @@ OPERATORS = {"|", "||", "&&", ";", "|&", "&", "(", ")", "{", "}"}
 # wrappers + shell keywords that precede the real command of a stage
 SKIP_BEFORE_CMD = {"sudo", "env", "nohup", "nice", "command", "time", "stdbuf",
                    "do", "then", "else", "elif"}
+# `<<EOF`, `<<-EOF`, `<< 'EOF'` - the delimiter must look like a word, so the
+# arithmetic shift in `$((x << 2))` is not mistaken for a heredoc.
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)([A-Za-z_]\w*)\1")
+
+
+def command_lines(command):
+    """Lines of `command` minus heredoc bodies - a body is data, not code.
+
+    Skips only when the closing delimiter line is really there, so a stray
+    match cannot swallow the rest of the command (and with it a real awk).
+    """
+    lines = command.splitlines()
+    kept, i = [], 0
+    while i < len(lines):
+        kept.append(lines[i])
+        i += 1
+        for m in HEREDOC.finditer(kept[-1]):
+            end = i
+            while end < len(lines) and lines[end].strip() != m.group(2):
+                end += 1
+            if end < len(lines):
+                i = end + 1
+    return kept
 
 
 def stage_commands(command):
@@ -29,7 +52,7 @@ def stage_commands(command):
     design - the guard is best-effort against a cooperative model.
     """
     cmds = []
-    for line in command.splitlines():
+    for line in command_lines(command):
         lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
         lexer.whitespace_split = True
         expect_cmd = True

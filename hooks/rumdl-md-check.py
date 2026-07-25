@@ -9,10 +9,7 @@ import shutil
 import subprocess
 import sys
 
-try:
-    data = json.load(sys.stdin)
-except (json.JSONDecodeError, ValueError):
-    sys.exit(0)  # unreadable input -> nothing to check
+data = json.load(sys.stdin)  # malformed stdin -> traceback, not a silent pass
 ti = data.get("tool_input", {})
 path = ti.get("file_path", "")
 if not path.endswith(".md"):
