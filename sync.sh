@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Sync ~/.claude config with its git remote.
 #
-#   sync.sh save   SessionEnd hook: commit local changes locally; NO network.
-#   sync.sh pull   interactive:     merge in the remote (run at session start).
-#   sync.sh push   interactive:     merge in the remote, then push (gated step).
+#   sync.sh save   SessionEnd hook:   commit local changes locally; NO network.
+#   sync.sh status SessionStart hook: note a push backlog; read-only, NO network.
+#   sync.sh pull   interactive:       merge in the remote (run at session start).
+#   sync.sh push   interactive:       merge in the remote, then push (gated step).
 #
 # Only `save` runs from a hook (local commit, no auth). pull/push touch the
 # network and run only in an interactive session, where your SSH agent /
@@ -20,13 +21,35 @@ log="$repo/sync.log"
 cd "$repo" 2>/dev/null || exit 0
 note() { echo "$(date '+%F %T') $*" >>"$log"; }
 
+# `status` is the SessionStart surface for a push backlog, which `save` otherwise
+# only ever writes to the log. Read-only, so it returns before the setup below -
+# it needs none of it, and a session start should not wait on provision.sh.
+# Threshold: 1-3 ahead is the steady state (147 of 229 saves), so only >=5 is
+# worth a line, the same "surface it once it matters" band the statusline uses.
+if [ "${1:-}" = status ]; then
+  if ! ahead="$(git rev-list --count @{u}..HEAD 2>/dev/null)"; then
+    echo "~/.claude: no upstream configured - these commits are not tracked anywhere."
+  elif [ "$ahead" -ge 5 ]; then
+    echo "~/.claude: $ahead commits unpushed (run /sync-push)."
+  fi
+  exit 0
+fi
+
+# Two runs can overlap - a SessionEnd save while another session pushes - and then
+# race on git's index or HEAD. Both failures are already in sync.log (index.lock,
+# ref CAS) and `save` exits 0, so they vanish. Serialize whole runs; never wait
+# long enough to stall a session end.
+exec 9>"$repo/.git/sync.lock"
+flock -w 30 9 || { note "lock: busy >30s, skipped ${1:-}"; exit 0; }
+
 # Commit a dirty tree locally (no network). Used by `save` and before `push`'s
 # pull - /model and /effort write settings.json mid-session, and a dirty tree
 # makes that pull refuse ("local changes would be overwritten by merge").
 commit_pending() {
   [ -n "$(git status --porcelain)" ] || return 0
   git add -A
-  git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log"
+  git commit -q -m "auto-save $(hostname) $(date '+%F %T')" 2>>"$log" \
+    || note "save: commit FAILED - tree still dirty (the ahead count will not move)"
 }
 
 # Hooks / the editor's `bash -c` don't source ~/.bashrc, so the shared ssh-agent
@@ -78,7 +101,7 @@ case "${1:-}" in
     fi
     ;;
   *)
-    note "usage: sync.sh save|pull|push"
+    note "usage: sync.sh save|status|pull|push"
     ;;
 esac
 exit 0
