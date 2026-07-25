@@ -10,8 +10,12 @@ This file is AI-written - every commit on it carries `Co-Authored-By: Claude Opu
 - Claims that pass unchecked are tagged UNVERIFIED. See "Verification status" for what was never reached.
 - **Status: Phase 1b is done and Phase 2's in-file part is decided. A PR into `master` is open for review.**
   - Resume at Phase 2's uninstalls, or Phase 3, or Phase 4. Phase 1b is kept only for its corrections.
-  - Two of this doc's own claims were **refuted** on 2026-07-25 - the awk-guard regression and the Phase 2
-    headline. Both are marked in place. Treat the remaining unexecuted claims with the same suspicion.
+  - The Phase 2 headline was **refuted** on 2026-07-25. Treat the remaining unexecuted claims the same way:
+    run the check the doc itself names before acting on any of them.
+- **A 4-lens review sweep on 2026-07-25 found 4 must-fix defects in the Phase 1b work itself**, all reproduced.
+  - Three were in the awk guard, one in `sync.sh`'s new lock, and one in the "narrowed" nvidia-smi allows.
+  - It also caught a wrong correction *in this doc*: the awk regression was real, just not the example given.
+  - Method that caught it: differential testing against master, not reading. Reading is what produced the error.
 
 ## Orchestration
 
@@ -104,18 +108,24 @@ Added 2026-07-25, during the Phase 1b session:
 **Phase 1 - config repo**, on branch `audit/phase1-fixes`: five commits, of which two carry the config work.
 
 - `f1039ae` (hooks) and `e759536` (instructions) are the work below. `f782c14`, `63643d1`, `d22273b` are this doc.
-- **The branch is one commit behind master** (`37a9a97`, Phase 0's autosave). This matters - see Phase 1b step 1.
+- ~~The branch is one commit behind master~~ - **resolved.** Master was merged in on 2026-07-25 (`dca6348`),
+  and `git merge-base --is-ancestor master HEAD` now passes. It mattered exactly once; see Phase 1b step 0.
 - **None of it is live.** `settings.json` registers hooks at `$HOME/.claude/hooks/`, which is still master
   byte-for-byte. No Phase 1 fix can be verified by running a session until the branch merges.
 
 Hooks:
 
 - awk-guard now lexes per line. The newline bypass is closed, verified end-to-end.
-  - **The claimed backslash-continuation regression does not exist.** Corrected 2026-07-25 by running both versions.
-    - Master lexes `cat f |\` + newline + `awk '...'` to `['cat', '\nawk']`, which matches no awk name - so master
-      did **not** deny it either. The branch raises `ValueError` and falls through. Same outcome, different route.
-    - It is a pre-existing bypass shared by both, not a regression, and not a merge blocker. The `ValueError`
-      catch is itself pre-existing - it sits at `hooks/awk-guard.py:46-49` on master.
+  - **A regression was real. The doc named the wrong example, and the first correction here was also wrong.**
+    - The stated example does not regress: master lexes `cat f |\` + newline + `awk '...'` to `['cat', '\nawk']`,
+      matching no awk name, so master did not deny it either. A pre-existing bypass shared by both.
+    - But testing only that example and concluding "no regression" was N=1. The review sweep found the real one:
+      **a multi-line quoted awk program**, which is how awk is normally written.
+    - `awk '<nl>BEGIN { system("cat ~/.env") }<nl>'` was **DENY on master, ALLOW on the branch**. Per-line lexing
+      unbalances the quote on each line, `shlex` raises, and the pre-existing catch turned that into "not awk".
+    - Fixed by the review sweep: catch `ValueError` **inside** the token loop (shlex raises lazily, so tokens already
+      yielded are kept) and union a per-line pass with a whole-command pass. Either pass alone has a hole.
+    - Guarded by a 28-case differential corpus that asserts nothing master denied is now allowed.
   - The false deny was real but narrower than stated: a heredoc body line that *starts with* `awk` was denied;
     one that merely mentions awk mid-line was not. **Fixed** in `28545ce` by skipping heredoc bodies.
     - The skip only fires when the closing delimiter is really present, so a stray match cannot swallow a real
@@ -377,7 +387,8 @@ Superseded by the above, kept so the coverage history reads straight:
 
 - Config edits go on a branch in a worktree; the working tree *is* the live config, so never edit `~/.claude`
   directly for anything under review.
-- The branch is behind master by Phase 0's autosave. Rebase or merge before rewriting any whole file.
+- Merge master into the branch before rewriting any whole file. Done once already (`dca6348`); master keeps
+  moving, because every SessionEnd autosaves onto it.
 - Pull with the app idle - a pull rewrites live config under any running session. Restart if `settings.json`
   changed.
 - Deletions of runtime state (daemon files, venvs, plugin caches) are one-way. Confirm before each.
