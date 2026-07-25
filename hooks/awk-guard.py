@@ -13,27 +13,36 @@ import shlex
 import sys
 
 # tokens that separate pipeline/list stages -> the next word is a fresh command
-OPERATORS = {"|", "||", "&&", ";", "|&", "&", "(", ")", "{", "}", "\n"}
+# (newlines separate stages too, but shlex eats them as whitespace - see below)
+OPERATORS = {"|", "||", "&&", ";", "|&", "&", "(", ")", "{", "}"}
 # wrappers + shell keywords that precede the real command of a stage
 SKIP_BEFORE_CMD = {"sudo", "env", "nohup", "nice", "command", "time", "stdbuf",
                    "do", "then", "else", "elif"}
 
 
 def stage_commands(command):
-    """Leading command word of each stage, quote-aware (`grep awk` is safe)."""
-    lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
-    lexer.whitespace_split = True
-    cmds, expect_cmd = [], True
-    for tok in lexer:
-        if tok in OPERATORS:
-            expect_cmd = True
-        elif not expect_cmd:
-            continue
-        elif re.fullmatch(r"[A-Za-z_]\w*=.*", tok) or tok in SKIP_BEFORE_CMD:
-            continue  # env assignment / wrapper -> real command is the next word
-        else:
-            cmds.append(tok)
-            expect_cmd = False
+    r"""Leading command word of each stage, quote-aware (`grep awk` is safe).
+
+    Lexes line by line: shlex never emits "\n" as a token, so a single-pass
+    lex lets any command after a newline ride the previous stage unseen.
+    Arg-position wrappers (find -exec, xargs, bash -c) stay out of scope by
+    design - the guard is best-effort against a cooperative model.
+    """
+    cmds = []
+    for line in command.splitlines():
+        lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        expect_cmd = True
+        for tok in lexer:
+            if tok in OPERATORS:
+                expect_cmd = True
+            elif not expect_cmd:
+                continue
+            elif re.fullmatch(r"[A-Za-z_]\w*=.*", tok) or tok in SKIP_BEFORE_CMD:
+                continue  # env assignment / wrapper -> real command is next word
+            else:
+                cmds.append(tok)
+                expect_cmd = False
     return cmds
 
 
