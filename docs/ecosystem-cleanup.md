@@ -6,13 +6,27 @@ Origin: a read-only audit of `~/.claude`, the five `~/Developer` repos, and the 
 (2026-07-24). Findings are evidence-backed - each cites a file, line, and quote - and the ones that
 drive work below are restated inline so this file stands alone.
 
+## Orchestration
+
+You are the orchestrator. Work the phases below; each is scoped to be handed to one subagent.
+
+- **Sequencing.** Phases 1b, 2, and 3 are independent - run them in parallel. Phase 4 waits on Phase 2
+  (both edit per-repo `.claude/settings*.json` in `ollama-modelfiles`). Phase 3 has hard internal
+  ordering, stated there.
+- **Model per task**, per the CLAUDE.md Delegation tiers: opus for the permissions prune, the sync
+  change, and any per-repo judgment; sonnet for mechanical edits with a checkable outcome (removing
+  `enabledPlugins` entries, pruning one-shot grants); haiku for locating things. Set `model`
+  explicitly - subagents inherit the session model otherwise.
+- **Stop and ask before**: merging any branch to master, uninstalling a plugin, deleting a repo or
+  directory, anything on the Windows machine, and any `git push`. These are one-way or outward-facing.
+- **Everything else proceeds without asking.** Editing a file on a review branch is not a consent gate.
+- **Report per phase**: what changed, the verification command and its output, and what you left.
+- **Do not merge `audit/phase1-fixes`.** It is under review; base new config work on it, not on master.
+
 ## Decisions already made
 
 Do not re-litigate these; they are settled with evidence.
 
-- **Posture: curated prune, not rebuild.** The core (sync repo, merge driver, hooks, personal skills,
-  permission mechanics, GitHub layer) audited healthy. The pain is concentrated in plugins, duplicated
-  ownership, stale state, and accretion.
 - **Model routing: Opus 5 is the default tier**, Fable escalates deliberately. Opus 5 shipped in
   v2.1.219 at half Fable's price; a same-prompt A/B at matched effort with no advisor spent 407.0K
   tokens (Opus 5) vs 407.9K (Fable) - equal work, half the price. Fable's documented niche is
@@ -132,6 +146,11 @@ cannot run. The clone is also 17 commits behind with no automatic pull anywhere.
 
 ## Open
 
+- **Posture is not settled.** Everything below is the *curated prune* path: fix defects, delete what
+  demonstrably does not earn its place, keep an architecture that audited healthy. The alternative
+  considered and not chosen was a ruthless-minimal core, which would additionally drop hookify
+  outright, cut CLAUDE.md harder, and skip the optional plugin reinstalls. Confirm before Phase 2 -
+  it is the phase where the two paths visibly diverge.
 - The two >120-col lines in `rules/settings-scope.md` predate this work and were left alone per
   "leave untouched text unrewrapped". They will re-nag on any full-file Write. Fix or annotate when
   next editing that file for its own reasons.
