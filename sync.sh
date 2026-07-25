@@ -25,10 +25,10 @@ note() { echo "$(date '+%F %T') $*" >>"$log"; }
 # only ever writes to the log. Read-only, so it returns before the setup below -
 # it needs none of it, and a session start should not wait on provision.sh.
 # Threshold: 1-3 ahead is the steady state (147 of 229 saves), so only >=5 is
-# worth a line, the same "surface it once it matters" band the statusline uses.
+# worth a line - surfacing the common case would say nothing.
 if [ "${1:-}" = status ]; then
   if ! ahead="$(git rev-list --count @{u}..HEAD 2>/dev/null)"; then
-    echo "~/.claude: no upstream configured - these commits are not tracked anywhere."
+    echo "~/.claude: cannot resolve @{u} - no upstream, or detached HEAD. Push state unknown."
   elif [ "$ahead" -ge 5 ]; then
     echo "~/.claude: $ahead commits unpushed (run /sync-push)."
   fi
@@ -37,10 +37,23 @@ fi
 
 # Two runs can overlap - a SessionEnd save while another session pushes - and then
 # race on git's index or HEAD. Both failures are already in sync.log (index.lock,
-# ref CAS) and `save` exits 0, so they vanish. Serialize whole runs; never wait
-# long enough to stall a session end.
-exec 9>"$repo/.git/sync.lock"
-flock -w 30 9 || { note "lock: busy >30s, skipped ${1:-}"; exit 0; }
+# ref CAS) and `save` exits 0, so they vanish. Serialize whole runs, and cap the
+# wait so a session end never stalls behind an interactive push.
+# Each failure reports its own cause: a lock we cannot open is not a busy lock,
+# and a skipped pull/push is not a success ("silence is not success", above).
+git_dir="$(git rev-parse --git-dir 2>/dev/null)" || git_dir="$repo/.git"
+if ! exec 9>"$git_dir/sync.lock"; then
+  note "lock: cannot open $git_dir/sync.lock"
+  [ "${1:-}" = save ] || echo "${1:-}: FAILED - cannot open the sync lock. See $log"
+  exit 0
+fi
+if ! flock -w 30 9; then
+  note "lock: busy >30s, skipped ${1:-}"
+  # A skipped `save` loses nothing - the tree stays dirty for the next one.
+  [ "${1:-}" = save ] && exit 0
+  echo "${1:-}: FAILED - another sync.sh held the lock for 30s; nothing done. See $log"
+  exit 1
+fi
 
 # Commit a dirty tree locally (no network). Used by `save` and before `push`'s
 # pull - /model and /effort write settings.json mid-session, and a dirty tree
