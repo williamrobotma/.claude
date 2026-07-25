@@ -134,11 +134,14 @@ under any running session. Restart the session if `settings.json` changed.
 
 ## Automation
 
-`sync.sh` plus one Claude Code hook (defined in `settings.json`, so it travels with
-the repo and self-distributes):
+`sync.sh` plus two Claude Code hooks (defined in `settings.json`, so they travel with
+the repo and self-distribute):
 
 - `SessionEnd` -> `sync.sh save` : commits local changes locally. No network, no
   auth - works on every machine; logs how many commits await push.
+- `SessionStart` -> `sync.sh status` : notes an unpushed backlog. Read-only, no network.
+  - Silent below 5 unpushed commits: 1-3 ahead is the steady state, so a note on every start would say nothing.
+  - A branch with no upstream gets its own marker rather than a count of 0.
 
 Everything that touches the network is interactive and deliberate:
 
@@ -156,6 +159,18 @@ pull/push MERGE rather than fast-forward-only: a divergent remote is reconciled,
 refused, and nothing on either side is silently overwritten or deleted. Bare `git push`
 is not in the permission allowlist, so `/sync-push` prompts - that prompt is the gate.
 `sync.sh` always exits 0 (never stalls a session) and logs to `sync.log` (untracked).
+Concurrent runs are serialized by an `flock` on `.git/sync.lock`, so a `SessionEnd`
+save that overlaps another session's push can't lose its commit to an `index.lock`
+or ref-CAS race.
+
+### Reading history past the auto-saves
+
+Auto-saves are 150 of 239 commits on master (62%), so plain `git log` is mostly snapshot noise. Filter at read time:
+
+    git log --oneline --invert-grep --grep='^auto-save '
+
+They are left in history on purpose. Collapsing them into one commit per push would
+lose the per-session author dates, and with them the answer to "which session changed this".
 
 ## GitHub access model (git = SSH, API = gh CLI, no token in env)
 

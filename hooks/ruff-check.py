@@ -4,9 +4,11 @@
 Exit 2 feeds the findings back to Claude so the fix happens in-turn
 (the task-end-tidy contract rule, enforced instead of remembered).
 Non-.py files and clean files fall through silently; a missing ruff
-fails loudly with a traceback rather than being masked.
+fails loudly with a one-line install pointer rather than being masked.
 """
 import json
+import os
+import shutil
 import subprocess
 import sys
 
@@ -20,9 +22,12 @@ path = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
 if not path.endswith((".py", ".ipynb")):
     sys.exit(0)
 
+ruff = shutil.which("ruff") or os.path.expanduser("~/.local/bin/ruff")
+if not os.path.exists(ruff):
+    sys.exit("ruff not found (PATH, ~/.local/bin): pipx install ruff")
 result = subprocess.run(
-    ["ruff", "check", "--output-format", "concise", path],
-    capture_output=True, text=True,
+    [ruff, "check", "--output-format", "concise", path],
+    capture_output=True, text=True, check=False,
 )
 if result.returncode:
     print(result.stdout + result.stderr, file=sys.stderr)
