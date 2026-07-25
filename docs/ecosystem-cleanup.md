@@ -18,7 +18,9 @@ You are the orchestrator. Work the phases below; each is scoped to be handed to 
   `enabledPlugins` entries, pruning one-shot grants); haiku for locating things. Set `model`
   explicitly - subagents inherit the session model otherwise.
 - **Stop and ask before**: merging any branch to master, uninstalling a plugin, deleting a repo or
-  directory, anything on the Windows machine, and any `git push`. These are one-way or outward-facing.
+  directory, anything on the Windows machine, any `git push`, and **writing the permissions prune**
+  (Phase 1b step 1 - present the diff first, see there). These are one-way, outward-facing, or trade
+  convenience for prompts in ways the user wants to see before they land.
 - **Everything else proceeds without asking.** Editing a file on a review branch is not a consent gate.
 - **Report per phase**: what changed, the verification command and its output, and what you left.
 - **Do not merge `audit/phase1-fixes`.** It is under review; base new config work on it, not on master.
@@ -70,8 +72,9 @@ Do not re-litigate these; they are settled with evidence.
 
 ### Phase 1b - finish the config repo (same branch)
 
-1. **Permissions** (`settings.json`; use the `auditing-permission-scope` skill). 138 allows -> ~110,
-   42 denies -> ~24, equal or better coverage:
+1. **Permissions** (`settings.json`; use the `auditing-permission-scope` skill). **Gated: propose the
+   full diff and the prompts it will cost, and wait for approval before writing it.** 138 allows ->
+   ~110, 42 denies -> ~24, equal or better coverage:
    - Delete `Bash(git add *)` and `Bash(git commit *)`. Together with the allowed `sync.sh push`
      they form a zero-prompt path to the remote, which contradicts the Git section's "offer the
      commit" / "push only on explicit request". The returned prompt *is* that offer.
