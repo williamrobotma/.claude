@@ -1,7 +1,7 @@
 ---
 paths:
-  - "**/settings.json"
-  - "**/settings.local.json"
+  - "**/.claude/settings.json"
+  - "**/.claude/settings.local.json"
 ---
 
 # Settings scope: `~/.claude/settings.local.json` is home-rooted project-local

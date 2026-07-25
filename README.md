@@ -82,8 +82,7 @@ only whether they sync, never whether they load (reading a file never consults g
 registered in `settings.json`, and that registration is itself tracked. So `rules/`
 and `CLAUDE.local.md` are the only zero-footprint local mechanisms - and only an
 untracked no-`paths` `rules/*.md` is both zero-footprint and global. Check what
-actually loaded with `/memory`, or the `InstructionsLoaded` hook (logs what loads,
-when, and why). Ref: https://code.claude.com/docs/en/memory
+actually loaded with `/memory`. Ref: https://code.claude.com/docs/en/memory
 
 ## Adding a new tracked file
 
