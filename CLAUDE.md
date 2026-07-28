@@ -83,8 +83,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 - "You approved it" is not a defense; a badly-framed choice isn't a real choice.
 - A correction taints nearby assumptions - re-audit the chain.
   - Corrected 2-3x on one point -> stop guessing and re-read all the stated constraints before answering again.
-- After any correction, offer to write the lesson via `/lesson` (project `.claude/rules/lessons.md`; a
-  genuinely global one goes to `~/.claude/rules/`).
+- After any correction, offer `/lesson` (project `.claude/rules/lessons.md`; global -> `~/.claude/rules/`).
   - Consolidate periodically with `/lessons-consolidate`: fold each lesson into its durable home, then delete it.
 
 ## Delegation
