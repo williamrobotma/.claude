@@ -19,6 +19,8 @@ Fan out several independent, report-only reviews on a PR, vet what they find, th
 3. Add any lens the diff warrants. No surface? Check it inline and record the null - don't spawn an agent.
 4. Fan out in parallel: one subagent per lens, each in its own worktree, each told "no edits, findings only", each given the same PR context and a fixed return format.
    - Pick each subagent's model with the `delegation` skill.
+   - Reviewers report everything: each finding with severity + confidence, uncertain/low-severity included.
+   - No self-filter instructions ("only important issues") - obeyed literally, they drop real bugs; steps 5-6 filter.
 5. Vet every finding against the diff: confirm it cites a real `file:line` and reproduces; drop the hallucinated or out-of-scope ones.
 6. Report once: severity-ranked findings, fixes grouped must-fix / optional / nit, plus what came back clean.
 7. Confirm before touching anything: let the user pick which tiers to apply.

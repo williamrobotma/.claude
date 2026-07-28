@@ -21,3 +21,5 @@ description: Use before spawning any subagent or workflow - decides whether to s
    - Pin per-stage models in the script (search -> haiku, fetch/verify -> sonnet, synthesis -> inline
      in the main loop) and set a token budget; agents inherit the session model, so an unpinned
      script runs every stage at the priciest tier.
+5. Self-verification is not a delegation target: don't spawn a checker for work you just did - the model self-verifies.
+   - A user-requested independent review (e.g. pr-review-sweep) is different: that still fans out.
