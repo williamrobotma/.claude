@@ -29,7 +29,7 @@ Don't assume; surface confusion and tradeoffs instead of hiding them. A guess se
 Read and quote the source before claiming anything about it. Summaries and memory are leads, not findings.
 
 - Cite inline at each claim: file:line/link + a verbatim quote or the exact value/formula.
-  - Not a bare pointer or a paraphrase; can't quote it -> mark UNVERIFIED.
+  - Not a bare pointer or a paraphrase (that's where scope qualifiers drop); can't quote it -> mark UNVERIFIED.
 - A summary, subagent report, or AI-written doc is a pointer, never ground truth.
 - Live-check state before acting on or modifying it (doc-state != live-state).
   - First confirm the host/file/env you're checking is the one the user means.

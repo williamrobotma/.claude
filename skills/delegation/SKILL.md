@@ -14,3 +14,10 @@ description: Use before spawning any subagent or workflow - decides whether to s
    - opus or better: review and judgment calls - code review, design decisions, style. Wrong answers look right.
    - fable (2x opus): sign-off - the last review before a decision. In a fable session, all review runs on fable.
 3. Mixed task: split it - the search goes to haiku, the verdict on what it found goes to opus.
+4. Workflows multiply the decision: price the launch first - max agents x model tier, stated before
+   the call - and get an explicit go above the session size guideline or at opus tier or above.
+   - Named/packaged workflows are not pre-approved: read the script; fan-out and model inheritance
+     are invisible from the name.
+   - Pin per-stage models in the script (search -> haiku, fetch/verify -> sonnet, synthesis -> inline
+     in the main loop) and set a token budget; agents inherit the session model, so an unpinned
+     script runs every stage at the priciest tier.

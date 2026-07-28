@@ -194,7 +194,7 @@
       "/tmp"
     ]
   },
-  "model": "opus",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -282,6 +282,7 @@
     }
   },
   "effortLevel": "xhigh",
+  "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
@@ -293,6 +294,5 @@
   "fileCheckpointingEnabled": true,
   "remoteControlAtStartup": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "advisorModel": "opus"
+  "agentPushNotifEnabled": true
 }
