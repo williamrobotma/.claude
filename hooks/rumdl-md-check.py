@@ -5,19 +5,22 @@ Exit 2 (feedback on stderr) when a line this edit added exceeds 120 cols.
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 
-data = json.load(sys.stdin)
+data = json.load(sys.stdin)  # malformed stdin -> traceback, not a silent pass
 ti = data.get("tool_input", {})
 path = ti.get("file_path", "")
 if not path.endswith(".md"):
     sys.exit(0)
 
-rumdl = os.path.expanduser("~/.local/bin/rumdl")
+rumdl = shutil.which("rumdl") or os.path.expanduser("~/.local/bin/rumdl")
+if not os.path.exists(rumdl):
+    sys.exit("rumdl not found (PATH, ~/.local/bin): pipx install rumdl")
 r = subprocess.run(
     [rumdl, "check", "-e", "MD013", "--output-format", "json", path],
-    capture_output=True, text=True,
+    capture_output=True, text=True, check=False,
 )
 if r.returncode == 0:
     sys.exit(0)
@@ -25,8 +28,10 @@ if r.returncode == 0:
 # Nag only about lines this edit added: keep a warning whose file line was in
 # new_string / content. Match on line text, not path (rumdl prints a relative
 # path); rumdl -e MD013 keeps the code-block / table exemptions a len() check
-# would lose.
+# would lose. Subtract old_string so Edit context lines (present before the
+# edit) don't re-flag pre-existing violations the edit was told to leave alone.
 added = set((ti.get("new_string") or ti.get("content") or "").splitlines())
+added -= set((ti.get("old_string") or "").splitlines())
 with open(path, encoding="utf-8") as f:
     lines = f.read().splitlines()
 hits = [w for w in json.loads(r.stdout) if lines[w["line"] - 1] in added]

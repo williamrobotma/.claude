@@ -58,7 +58,10 @@ The minimum that solves the problem; nothing speculative.
 
 Touch only what you must; clean up only your own mess.
 
-- Every changed line traces to the request; match existing style. Leave adjacent dead code (note it, don't delete).
+- Every changed line traces to the request; match existing *code* style.
+  - Leave adjacent dead code (note it, don't delete).
+  - Prose is the exception: new/edited prose follows the Writing rules, not the repo's doc style.
+  - Leave untouched text unrewrapped.
 - Don't edit a running or source-of-truth file without consent; show a spec-file change in full-document context first.
 
 ### 5. Verify, then report faithfully
@@ -80,24 +83,33 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 - "You approved it" is not a defense; a badly-framed choice isn't a real choice.
 - A correction taints nearby assumptions - re-audit the chain.
   - Corrected 2-3x on one point -> stop guessing and re-read all the stated constraints before answering again.
-- After any correction, offer to write the lesson via `/lesson` (project `.claude/rules/lessons.md`).
-  - Consolidate periodically with `/lessons-consolidate`.
+- After any correction, offer to write the lesson via `/lesson` (project `.claude/rules/lessons.md`; a
+  genuinely global one goes to `~/.claude/rules/`).
+  - Consolidate periodically with `/lessons-consolidate`: fold each lesson into its durable home, then delete it.
 
 ## Delegation
 
-- Before spawning any agent or workflow, use the `delegation` skill.
-- Price first: agent count x model. Agents inherit the session model unless overridden.
-- `scout` (haiku) finds things; `mechanic` (sonnet) makes mechanical edits. Neither reviews or judges.
-- A scout's "not found" is a lead, not a conclusion (rule 2).
+Price first: agent count x model. Agents inherit the session model unless overridden - always set `model` explicitly.
+
+- A quick check (a grep, a count, one file read) -> do it inline. No agent.
+- Match the model to how hard a mistake is to catch:
+  - haiku: search - find a file, grep a pattern, fetch a page. Wrong answers are obviously wrong.
+  - sonnet: mechanical edits and fact-checking - rename sweeps, a known fix, a lookup you'll verify at the source.
+  - opus: the default for judgment - review, design decisions, anything where a wrong answer looks right.
+  - fable (2x opus): multi-sitting autonomous runs and genuinely ambiguous investigation. Escalate deliberately.
+- Mixed task: split it - the search goes to haiku, the verdict on what it found goes to opus.
+- Don't spawn a checker for work you just did - verify it inline (current Opus-tier models self-verify).
+  - Still fans out: user-requested review (pr-review-sweep); long Fable runs, where fresh-context verifiers win.
+- A subagent's "not found" is a lead, not a conclusion (rule 2).
 
 ## Writing
 
-- Basic keyboard symbols only in chat, code, commits, and .md prose.
+- Basic keyboard symbols only in chat, code, commits, and .md prose (hooks cover .md only).
   - `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot.
-  - Hooks enforce the glyphs and the 120-col barometer for .md.
 - Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
-  - Fix a >120 line by cutting or splitting ideas, never by a mid-idea line break (hook detects the break).
-- Concise = dense per word: cut redundancy first, then split multi-idea lines into sub-bullets (all .md).
+  - Fix a >120 line by cutting or splitting ideas, never by a mid-idea line break.
+    - Nothing enforces this: rumdl flags the length, not the break.
+- Concise = dense per word: cut redundancy, then split multi-idea lines into sub-bullets. Never split one idea.
   - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
 - Size written deliverables to the task: cover the substance and skip filler, redundant summaries, and boilerplate.
 - Chat: bullets/tables over paragraphs.
