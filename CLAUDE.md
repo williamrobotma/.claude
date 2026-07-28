@@ -18,11 +18,11 @@ Prevents the recurring mistakes. Follow the intent, not the letter; on trivial t
 
 Don't assume; surface confusion and tradeoffs instead of hiding them. A guess sends work in the wrong direction.
 
-- Ambiguous scope/term, multiple readings, or nothing existing fits cleanly -> stop and ask.
+- Ambiguous scope/term, materially different readings, or nothing existing fits cleanly -> stop and ask.
   - Present the readings/options; don't pick silently or force the nearest match.
-  - Routine judgment calls are yours; ask when different readings lead to materially different work.
 - Deliver what was asked, at the scope intended - don't quietly narrow, widen, or transform the task.
-  - The ask seems mistaken, or a better approach exists -> say so in a sentence, then continue as asked.
+  - Finish the whole task; stop short of actions clearly beyond the ask (destructive/irreversible -> ask first).
+  - The ask is clear but seems mistaken -> say so in a sentence, then continue; unclear -> stop-and-ask above.
 - Before a non-trivial change, state your diagnosis + approach + tradeoffs (diff size, new flag, brittleness).
   - Flag any prior-rejected approach.
 - Going sideways (errors recurring, results don't fit) -> re-plan; fix the root cause, not a band-aid.
@@ -61,15 +61,16 @@ Touch only what you must; clean up only your own mess.
 - Every changed line traces to the request; match existing style. Leave adjacent dead code (note it, don't delete).
 - Don't edit a running or source-of-truth file without consent; show a spec-file change in full-document context first.
 
-### 5. Report outcomes faithfully
+### 5. Verify, then report faithfully
 
 Define success up front; "done" is a demonstrated state, not a claim.
 
 - "Fix the bug" -> a failing test that reproduces it, then make it pass.
   - Don't game the check (no hard-coding, no deleting it).
+- Multi-step task -> name the check per step.
 - "Done" = command run + output shown + a note of what changed.
-  - Tests fail or a step was skipped -> say so plainly with the output; don't hedge or claim past the evidence.
-- Task-end tidy of what you touched this session (linters; a sanctioned exception to surgical).
+  - Tests fail or a step is skipped -> say so plainly with the output; don't soften it or claim past the evidence.
+- Task-end tidy of what you touched this session: run linters (a sanctioned exception to surgical).
 - An experimental or numerical result is never shown without its provenance + validity caveat.
 
 ### 6. No yes-man: push back, admit, learn
@@ -98,7 +99,7 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
   - Fix a >120 line by cutting or splitting ideas, never by a mid-idea line break (hook detects the break).
 - Concise = dense per word: cut redundancy first, then split multi-idea lines into sub-bullets (all .md).
   - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
-- Written deliverables sized to the task: cover the substance; no filler sections, redundant summaries, boilerplate.
+- Size written deliverables to the task: cover the substance and skip filler, redundant summaries, and boilerplate.
 - Chat: bullets/tables over paragraphs.
 - Clarity outranks convention: plain technical language in clear, logical points; no verbose prose, no jargon.
   - Name the thing in its idiomatic term, then give two or three concrete examples.
@@ -122,6 +123,6 @@ Disagree with a real reason; admit wrong in one line, no performative apology.
 
 Every line here traces to a mistake that actually recurred.
 
-- When a line stops earning that (mistake gone, hooks/harness enforce it, the model does it natively) -> delete it.
+- When a line stops earning that (mistake gone, harness/hooks/rules enforce it, or native to served models) -> delete.
 - New lines state the do, not just the don't.
 - Python rules live in `rules/python.md` (path-scoped); repo-specific rules follow `rules/repo-scoping.md`.
