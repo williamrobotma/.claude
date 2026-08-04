@@ -19,8 +19,7 @@ graduates to a proper home or gets deleted.
    - **Graduate - enforce**: "must happen at a fixed point" (before commit,
      after edit) -> a hook; prose can then be deleted, not duplicated.
    - **Keep**: still project-specific and still preventing a live mistake.
-   - **Delete**: stale, superseded, N=1 that never recurred, or now covered
-     by the harness/hooks.
+   - **Delete**: stale, superseded, N=1 that never recurred, covered by hooks/rules, or native to served models.
 3. Show the proposal as a table (entry -> bucket -> destination) and, for any
    CLAUDE.md change, the edited section in full-document context. Wait for
    consent before writing (contract rule 4).
