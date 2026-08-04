@@ -6,7 +6,7 @@ Review gate first - the repo is PUBLIC, and SessionEnd auto-commits new files wi
 1. Run `bash ~/.claude/sync.sh save` so working-tree edits are committed and reviewable.
 2. Show me the outgoing delta:
    - `git -C ~/.claude log --oneline @{u}..HEAD`
-   - `git -C ~/.claude diff @{u}..HEAD`
+   - `git -C ~/.claude diff @{u}...HEAD` (three-dot: since merge-base, so a diverged remote isn't shown reversed)
    - Nothing outgoing -> report "up to date", stop.
 3. Flag anything that looks sensitive (credentials, tokens, private paths/hostnames, project details in lessons/rules), then ask me to approve the push. No approval -> stop; nothing is pushed.
 
