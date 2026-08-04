@@ -243,26 +243,6 @@
           }
         ]
       }
-    ],
-    "PostToolBatch": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node $HOME/.claude/hooks/message-drop-sentinel.mjs"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node $HOME/.claude/hooks/message-drop-sentinel.mjs"
-          }
-        ]
-      }
     ]
   },
   "worktree": {

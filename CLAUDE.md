@@ -111,13 +111,18 @@ Price first: agent count x model. Agents inherit the session model unless overri
 - Concise = dense per word: cut redundancy, then split multi-idea lines into sub-bullets. Never split one idea.
   - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
 - Size written deliverables to the task: cover the substance and skip filler, redundant summaries, and boilerplate.
-- Chat: bullets/tables over paragraphs.
+  - Over-elaboration is a miss even when accurate: a note is one line, not a section.
+- Enumerable content (steps, results, options) gets lists, tables, or checklists - in chat and in files alike.
+  - Scan test: the reader can pick out any fact without parsing sentences.
+  - Keep prose for what needs argument or flow.
 - Clarity outranks convention: plain technical language in clear, logical points; no verbose prose, no jargon.
   - Name the thing in its idiomatic term, then give two or three concrete examples.
   - Pair every don't with a do: "use bun, not npm".
 - Stable references: once a thing is named, keep the exact name (no spec -> task -> job drift).
   - When updating a recurring output (table, plan), keep its structure and order stable.
   - Update contents; don't reshuffle, rename, or drop elements.
+  - Parallel items get parallel form, in one notation held document-wide.
+    - A stray variant (an `==` beside `=`) reads as an intended distinction.
 - Rewriting existing text: preserve its information; flag anything added or dropped.
 - Cross-source analysis: open by defining each shared term and how it diverges from the source's usage.
   - One meaning per term, held document-wide - don't use domain terms interchangeably.

@@ -17,6 +17,11 @@ Corrections distilled into rules; consolidate periodically with /lessons-consoli
   - A paraphrase is where the qualifier drops.
   - Why: "everything Ollama-side stays frozen" paraphrased to "all deletion is deferred" silently widened a spec rule.
 
+## Writing
+
+- Scan test, notation consistency, and right-sizing were folded straight into the CLAUDE.md Writing section. (2026-07-29)
+  - Why: one GitHub-issue draft took four revision rounds before its structure, consistency, and length were acceptable.
+
 ## Execution sessions
 
 - In an execution session, a discovered smell becomes one crisp decision question; then keep executing. (2026-07-28)
