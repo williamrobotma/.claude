@@ -188,7 +188,7 @@
       "/tmp"
     ]
   },
-  "model": "sonnet",
+  "model": "claude-fable-5[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -285,7 +285,7 @@
       }
     }
   },
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "opus",
   "askUserQuestionTimeout": "never",
   "tui": "fullscreen",
