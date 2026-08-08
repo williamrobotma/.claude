@@ -6,8 +6,8 @@ Corrections distilled into rules; consolidate periodically with /lessons-consoli
 
 - Price every spawn before launch: state max agents x model tier. (2026-07-28)
   - Gate on an explicit go when it exceeds the session guideline or runs at opus tier or above.
-  - A skill invocation whose text states its default price is the go for that price; beyond it, gate. (2026-08-07)
   - Packaged/named workflows are not pre-approved: read the script - fan-out and model inheritance are invisible.
+  - Exception: a skill whose text states its default price (count x tier) is pre-approved at that price.
   - Pin per-stage models (search -> haiku, verify -> sonnet, synthesis -> inline) and set a token budget.
   - Unpinned stages inherit the session model, so the whole script runs at the priciest tier.
   - Why: a named deep-research workflow spawned 103 agents on the session model and burned the session limit.
@@ -17,11 +17,10 @@ Corrections distilled into rules; consolidate periodically with /lessons-consoli
 - Cite the exact line verbatim at claim time: the scope qualifier is part of the claim. (2026-07-28)
   - A paraphrase is where the qualifier drops.
   - Why: "everything Ollama-side stays frozen" paraphrased to "all deletion is deferred" silently widened a spec rule.
-  - The revision a line was read at, and the policy doc defining its terms, are scope qualifiers too. (2026-08-07)
-    - Why: called a moved build a broken pin and retargeted a working fix to the stale pin; the repo's
-      pins-move-forward policy was already in my grep output, and the user rewrote the posted review.
-- Sweep for a deleted artifact under every name form it had (path, id, basename); one form's null is not a null. (2026-08-07)
-  - Why: searched deleted Modelfiles by directory path and cleared the README; a reviewer found 8 stale rows by model id.
+- The revision a line was read at, and the policy doc defining its terms, are scope qualifiers too. (2026-08-07)
+  - Why: called a moved build a broken pin; the repo's pins-move-forward policy was already in my grep output.
+- Sweep for a deleted artifact under every name form it had (path, id, basename). (2026-08-07)
+  - Why: searched deleted Modelfiles by path only; a reviewer found 8 stale README rows by model id.
 
 ## Writing
 
