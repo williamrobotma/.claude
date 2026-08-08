@@ -47,7 +47,11 @@ if ! exec 9>"$git_dir/sync.lock"; then
   [ "${1:-}" = save ] || echo "${1:-}: FAILED - cannot open the sync lock. See $log"
   exit 0
 fi
-if ! flock -w 30 9; then
+# Git Bash on Windows ships no flock; run unlocked there (the pre-lock behavior)
+# rather than failing every sync, and keep the gap visible in the log.
+if ! command -v flock >/dev/null 2>&1; then
+  note "lock: flock unavailable on this host, proceeding unlocked"
+elif ! flock -w 30 9; then
   note "lock: busy >30s, skipped ${1:-}"
   # A skipped `save` loses nothing - the tree stays dirty for the next one.
   [ "${1:-}" = save ] && exit 0

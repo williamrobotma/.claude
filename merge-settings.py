@@ -67,7 +67,9 @@ def main():
     # git's throwaway scratch copy and neutralize has already read it, so write
     # the patched text back over it and hand that to merge-file.
     patched = neutralize(ours, theirs, PER_MACHINE & changed)
-    with open(theirs, "w", encoding="utf-8") as f:
+    # newline="" - without it Windows Python writes \r\n, making every line of
+    # theirs differ from base and turning the merge into a whole-file conflict.
+    with open(theirs, "w", encoding="utf-8", newline="") as f:
         f.write(patched)
     sys.exit(subprocess.call(["git", "merge-file", ours, base, theirs]))
 
