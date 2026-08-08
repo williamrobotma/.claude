@@ -292,6 +292,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
+  "verbose": true,
   "autoCompactEnabled": true,
   "switchModelsOnFlag": false,
   "fileCheckpointingEnabled": true,
