@@ -21,6 +21,12 @@ Corrections distilled into rules; consolidate periodically with /lessons-consoli
   - Why: called a moved build a broken pin; the repo's pins-move-forward policy was already in my grep output.
 - Sweep for a deleted artifact under every name form it had (path, id, basename). (2026-08-07)
   - Why: searched deleted Modelfiles by path only; a reviewer found 8 stale README rows by model id.
+- An activity claim needs an activity source (logged runs/requests), cited at claim time. (2026-08-08)
+  - Elapsed calendar time is not activity; a plan's future-tense phrase is not a record; X's result is not Y's.
+  - A recorded caveat is never "outweighed" by an uncited claim: override with a source, or not at all.
+  - Pressure test: the moment a claim justifies the recommendation you already prefer, re-derive it from sources.
+  - Why: "weeks of crash-free mileage" fused a spec phrase + a date span + another model's clean run, and was
+    asserted over the correct caveat sitting 8 lines above it in the same file.
 
 ## Writing
 
