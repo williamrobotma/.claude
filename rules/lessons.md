@@ -21,6 +21,11 @@ Corrections distilled into rules; consolidate periodically with /lessons-consoli
   - Why: called a moved build a broken pin; the repo's pins-move-forward policy was already in my grep output.
 - Sweep for a deleted artifact under every name form it had (path, id, basename). (2026-08-07)
   - Why: searched deleted Modelfiles by path only; a reviewer found 8 stale README rows by model id.
+- Absence is a claim: prove it over the whole search space, never from a truncated or narrowed search. (2026-08-09)
+  - No `| head` on a grep meant to show something is missing - count matches tree-wide, then quote the zero.
+  - To test that a switch turned X off, look for X's own marker to disappear; a nearby metric sharing vocabulary lies.
+  - Why: `grep ... | head -8` filled with near-miss hits, so "the env var was removed upstream" shipped to git; the var
+    was one match further down, and the counter read as proof was a different subsystem's.
 - An activity claim needs an activity source (logged runs/requests), cited at claim time. (2026-08-08)
   - Elapsed calendar time is not activity; a plan's future-tense phrase is not a record; X's result is not Y's.
   - A recorded caveat is never "outweighed" by an uncited claim: override with a source, or not at all.
