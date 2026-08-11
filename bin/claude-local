@@ -21,18 +21,23 @@ last=$(cat "$last_file" 2>/dev/null || true)
 
 body=$(curl -fsS -m 5 "$router/v1/models") \
     || { echo "claude-local: no model list from $router/v1/models - is the router up?" >&2; exit 1; }
-lanes=$(python3 -c "
+lanes=$(CL_BODY=$body python3 - <<'EOF'
 import json
+import os
 import sys
 
-for m in json.load(sys.stdin)['data']:
-    status = m.get('status', '?')  # an object on this router: {value, args, ...}
+for m in json.loads(os.environ["CL_BODY"])["data"]:
+    status = m.get("status", "?")  # an object on this router: {value, args, ...}
     if isinstance(status, dict):
-        status = status.get('value', '?')
-    print(m['id'] + '\t' + str(status))
-    for alias in m.get('aliases', []):
-        print(alias + '\t' + 'alias -> ' + m['id'])
-" <<<"$body")
+        status = status.get("value", "?")
+    for name in [m["id"], *m.get("aliases", [])]:
+        # A control char in an id could forge menu rows or ANSI-redraw the TTY; skip it visibly.
+        if any(ord(c) < 0x20 or ord(c) == 0x7f for c in name):
+            print("claude-local: skipping unprintable id %r" % name, file=sys.stderr)
+            continue
+        print(name + "\t" + (str(status) if name == m["id"] else "alias -> " + m["id"]))
+EOF
+) || { echo "claude-local: could not parse the $router/v1/models response" >&2; exit 1; }
 list=()
 while IFS=$'\t' read -r id status; do list+=("$id"$'\t'"$status"); done < <(LC_ALL=C sort <<<"$lanes")
 [ ${#list[@]} -gt 0 ] || { echo "claude-local: $router/v1/models returned an empty fleet" >&2; exit 1; }
@@ -83,6 +88,9 @@ with open(path, encoding="utf-8") as f:
 print(json.dumps({"enabledPlugins": {name: False for name in plugins}}))
 EOF
 )"
+# Fail closed: an unreadable/malformed settings.json would otherwise yield --settings= (silently accepted,
+# all plugins on) - the opposite of this script's contract.
+[ -n "$no_plugins" ] || { echo "claude-local: could not build the plugin-disable override from ~/.claude/settings.json" >&2; exit 1; }
 
 # Web-search MCP: WSL-only wiring (vendored in ollama-modelfiles, run via pipx); gated on its
 # config existing. Its secrets file is then required, as in the original ~/.bashrc fn.
