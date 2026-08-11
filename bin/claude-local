@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# claude-local: launch Claude Code against a local model with every plugin off.
+#
+# Synced part only. The machine shim (PowerShell profile on Windows, alias in
+# WSL/macOS) sets the proxy env BEFORE calling this: ANTHROPIC_BASE_URL and
+# ANTHROPIC_MODEL are required here; ANTHROPIC_AUTH_TOKEN and
+# CLAUDE_CODE_SUBAGENT_MODEL are proxy-specific and pass through if set.
+#
+# Plugins: --settings is a per-session CLI-arg override (beats settings.json;
+# docs: settings precedence, cli-reference --settings). The override enumerates
+# every key of settings.json's enabledPlugins as false - built at launch, so it
+# never goes stale and settings.json itself is never touched.
+set -euo pipefail
+
+: "${ANTHROPIC_BASE_URL:?claude-local: set ANTHROPIC_BASE_URL in the machine shim}"
+: "${ANTHROPIC_MODEL:?claude-local: set ANTHROPIC_MODEL in the machine shim}"
+
+no_plugins="$(python3 - <<'EOF'
+import json
+import os
+
+path = os.path.expanduser("~/.claude/settings.json")
+with open(path, encoding="utf-8") as f:
+    plugins = json.load(f).get("enabledPlugins", {})
+print(json.dumps({"enabledPlugins": {name: False for name in plugins}}))
+EOF
+)"
+
+exec claude --settings "$no_plugins" "$@"
