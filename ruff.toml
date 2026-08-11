@@ -1,7 +1,7 @@
-# ruff user-global config, synced via ~/.claude.
-# provision.sh symlinks ~/.config/ruff/ruff.toml -> this file, so ruff
-# reads it at the standard XDG location. It applies ONLY when a project has no
-# own ruff config (any project pyproject.toml/ruff.toml overrides it entirely).
+# ruff user-global config, synced via ~/.claude; provision.sh lands it where
+# ruff looks: an XDG symlink (~/.config/ruff/ruff.toml) on Linux/macOS/WSL, a
+# refreshed copy at %APPDATA%/ruff/ruff.toml on Windows. It applies ONLY when a
+# project has no own ruff config (any pyproject.toml/ruff.toml overrides it).
 #
 # Encodes the lint-expressible parts of rules/python.md deterministically:
 #   S101: checks the code depends on are a `raise`, never an `assert`

@@ -1,5 +1,6 @@
-# rumdl user-global config, synced via ~/.claude; provision.sh symlinks
-# ~/.config/rumdl/rumdl.toml -> this file.
+# rumdl user-global config, synced via ~/.claude; provision.sh lands it where
+# rumdl looks: an XDG symlink (~/.config/rumdl/rumdl.toml) on Linux/macOS/WSL,
+# a refreshed copy at %APPDATA%/rumdl/rumdl.toml on Windows.
 # MD013 is a 120-col barometer, check-only: its fix hard-wraps, which the
 # never-hard-wrap style forbids. Never run --fix without --unfixable MD013.
 [global]
