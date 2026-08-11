@@ -8,15 +8,27 @@
 # Shell (not Python) on purpose: no interpreter-version constraint.
 set -uo pipefail
 
-# rumdl/ruff: their user-global configs have no env-var override, so a symlink
-# at the XDG location is the sync mechanism: ~/.config/<tool>/<tool>.toml ->
-# the synced ~/.claude copy. Create ONLY if the target is absent - never
-# clobber a real file a machine may already have. (ruff's user config applies
+# rumdl/ruff: their user-global configs have no env-var override, so the synced
+# ~/.claude copy has to land where each tool looks. (ruff's user config applies
 # only when a project has no own ruff config.)
+# Linux/macOS/WSL - first class: a symlink at the XDG location,
+# ~/.config/<tool>/<tool>.toml -> the synced copy. Create ONLY if the target is
+# absent - never clobber a real file, and a live symlink tracks the repo by itself.
+# Windows (Git Bash, detected via APPDATA; WSL never sets it): the native tools
+# read %APPDATA%/<tool>/ instead of ~/.config, and `ln -s` here silently COPIES,
+# so a symlink can neither land right nor stay fresh (a frozen copy shipped a
+# stale MD013 policy, found 2026-08-10) - refresh the copy whenever it differs.
 for tool in rumdl ruff; do
-  if [ -f "$HOME/.claude/$tool.toml" ] && [ ! -e "$HOME/.config/$tool/$tool.toml" ]; then
+  src="$HOME/.claude/$tool.toml"
+  [ -f "$src" ] || continue
+  if [ -n "${APPDATA:-}" ]; then
+    if ! cmp -s "$src" "$APPDATA/$tool/$tool.toml" 2>/dev/null; then
+      mkdir -p "$APPDATA/$tool"
+      cp "$src" "$APPDATA/$tool/$tool.toml"
+    fi
+  elif [ ! -e "$HOME/.config/$tool/$tool.toml" ]; then
     mkdir -p "$HOME/.config/$tool"
-    ln -s "$HOME/.claude/$tool.toml" "$HOME/.config/$tool/$tool.toml"
+    ln -s "$src" "$HOME/.config/$tool/$tool.toml"
   fi
 done
 

@@ -7,6 +7,8 @@
 !LICENSE
 !sync.sh
 !merge-settings.py
+!bin/
+!bin/claude-local
 !statusline-command.sh
 !provision.sh
 !rumdl.toml
