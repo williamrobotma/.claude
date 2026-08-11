@@ -2,6 +2,11 @@
 
 For the WSL2 session. Context: plugin-disabling was made a claude-local feature, and claude-local itself became one synced script.
 
+Update 2026-08-11: a later session rewrote `bin/claude-local` against the live router - the menu now
+lists aliases from `/v1/models` (marked `alias -> <id>`), the status parse matches the real response
+shape, and the canonical spec moved to ollama-modelfiles `AGENTS.md#claude-local`. Step 3 below is
+resolved by that work; the Done section describes the original port, superseded in those details.
+
 ## Done
 
 - New synced launcher `~/.claude/bin/claude-local` (bash, executable, allowlisted in `.gitignore`): a port of the WSL `~/.bashrc` fn with these changes.
@@ -13,7 +18,9 @@ For the WSL2 session. Context: plugin-disabling was made a claude-local feature,
     - Verified: a `--settings` plugin override beats the settings.json value (CLI-arg precedence);
       a launch through the script showed `"plugins":[]` in the init event.
   - Web-search MCP wiring (`--disallowedTools=WebSearch`, `--mcp-config`, sourcing `~/.config/claude-local.env`) is gated on `~/.config/claude-local.mcp.json` existing - present in WSL, absent on Windows/macOS.
-- Windows shim `~/bin/claude-local.ps1` (machine-local, untracked) is now just `bash "$HOME/.claude/bin/claude-local" @args`; its stale hardcoded env (Ollama-era model name, token) is gone.
+- Windows shim `~/bin/claude-local.ps1` (machine-local, untracked) now execs the script via Git Bash's full path.
+  - Its stale hardcoded env (Ollama-era model name, token) is gone.
+  - Bare `bash` in PowerShell resolves to the WSL launcher and breaks - hence the full path.
 - `settings.json` `enabledPlugins` reverted to the upstream values: the 7 plugins this machine had turned off are back on.
   - github, hookify, superpowers, and the life-sciences set stay false, as upstream had them.
   - The global disable was a workaround this replaces; it never reaches other machines' history.
@@ -34,7 +41,6 @@ For the WSL2 session. Context: plugin-disabling was made a claude-local feature,
 1. `bash ~/.claude/sync.sh pull` to receive `bin/claude-local`.
 2. Replace the `~/.bashrc` `claude-local()` fn (lines ~161-213) with: `claude-local() { "$HOME/.claude/bin/claude-local" "$@"; }`.
    - The old fn also has a menu bug the script fixes: pick `00` indexes `-1`, silently selecting the last lane.
-3. Verify against the live router (Windows could not - router down, GPU blocked):
-   - a real interactive launch end-to-end (menu, lane pick, session works);
-   - UNVERIFIED: whether `/v1/models` lists `models.ini` aliases alongside ids - if not, aliases are reachable only via the verbatim escape hatch; decide if the menu should merge them in.
-4. Update ollama-modelfiles `CLAUDE.md#claude-local` (feat/llamacpp-migration): the fn is now a shim over the synced script, and the menu source is the live router, not `models.ini`.
+3. DONE (2026-08-11 rewrite): live-router verification; `/v1/models` does list aliases and the menu shows them.
+4. Update the ollama-modelfiles claude-local spec (now `AGENTS.md#claude-local`, feat/llamacpp-migration):
+   the fn is a shim over the synced script, and the menu source is the live router, not `models.ini`.
