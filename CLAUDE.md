@@ -33,6 +33,9 @@ Read and quote the source before claiming anything about it. Summaries and memor
 
 - Cite inline at each claim: file:line/link + a verbatim quote or the exact value/formula.
   - Not a bare pointer or a paraphrase (that's where scope qualifiers drop); can't quote it -> mark UNVERIFIED.
+- Absence is a claim too: search the whole space with no truncation, under every name the thing had.
+- A claim that something ran or happened needs a log of it - not elapsed time, a plan, or another system's result.
+- Never override a recorded caveat without citing a source, especially when it blocks the option you prefer.
 - A summary, subagent report, or AI-written doc is a pointer, never ground truth.
 - Live-check state before acting on or modifying it (doc-state != live-state).
   - First confirm the host/file/env you're checking is the one the user means.
@@ -71,6 +74,7 @@ Define success up front; "done" is a demonstrated state, not a claim.
 - "Fix the bug" -> a failing test that reproduces it, then make it pass.
   - Don't game the check (no hard-coding, no deleting it).
 - Multi-step task -> name the check per step.
+- Test the artifact the user will actually run, not a simplified stand-in, and say which one you tested.
 - "Done" = command run + output shown + a note of what changed.
   - Tests fail or a step is skipped -> say so plainly with the output; don't soften it or claim past the evidence.
 - Task-end tidy of what you touched this session: run linters (a sanctioned exception to surgical).
@@ -100,6 +104,8 @@ Price first: agent count x model. Agents inherit the session model unless overri
 - Don't spawn a checker for work you just did - verify it inline (current Opus-tier models self-verify).
   - Still fans out: user-requested review (pr-review-sweep); long Fable runs, where fresh-context verifiers win.
 - A subagent's "not found" is a lead, not a conclusion (rule 2).
+- Opus tier or above, or past the session guideline -> get an explicit go first, with a token budget.
+- Named workflows and skills are not pre-approved: read the script and price it, unless it states its own price.
 
 ## Writing
 
