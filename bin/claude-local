@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # claude-local: route Claude Code to the llama-server router (11433, /v1/messages) via a lane menu,
 # with every plugin disabled for the session. Synced to all machines; canonical spec lives in
-# williamrobotma/ollama-modelfiles CLAUDE.md#claude-local (feat/llamacpp-migration).
+# williamrobotma/ollama-modelfiles AGENTS.md#claude-local (feat/llamacpp-migration).
 #
 # Lane = the fleet model serving ALL session roles: ANTHROPIC_MODEL + tier + subagent vars (B6 fix).
 # No flag and no hardcoded default: a numbered menu picks the lane; Enter re-picks the last one
 # (~/.config/claude-local.last). All claude args, --model included, pass through untouched;
 # mid-session /model moves only the main session.
-# Anything non-numeric is taken as a lane name verbatim - the escape hatch; the router 404s on a typo.
-# Menu = the router's live /v1/models ids, sorted (C collation), with each lane's status
-# (loaded / sleeping / unloaded) so a resident lane can be picked without waking the GPU.
+# Anything that is not a menu number is taken as a lane name verbatim - the escape hatch; the router
+# 404s on a typo.
+# Menu = the router's live /v1/models ids plus each entry's aliases (aliases resolve in request bodies
+# but are never listed as ids - server-models.cpp get_router_models), sorted (C collation), with each
+# lane's status (loaded / sleeping / unloaded) so a resident lane can be picked without waking the GPU.
 # Listing is read-only - nothing here instantiates a model.
 set -uo pipefail
 
@@ -24,7 +26,12 @@ import json
 import sys
 
 for m in json.load(sys.stdin)['data']:
-    print(m['id'] + '\t' + str(m.get('status', '?')))
+    status = m.get('status', '?')  # an object on this router: {value, args, ...}
+    if isinstance(status, dict):
+        status = status.get('value', '?')
+    print(m['id'] + '\t' + str(status))
+    for alias in m.get('aliases', []):
+        print(alias + '\t' + 'alias -> ' + m['id'])
 " <<<"$body")
 list=()
 while IFS=$'\t' read -r id status; do list+=("$id"$'\t'"$status"); done < <(LC_ALL=C sort <<<"$lanes")
@@ -44,9 +51,9 @@ elif [ -n "$last" ]; then
     echo "claude-local: non-interactive, reusing lane $last" >&2
 fi
 case $pick in
-    '')         model=$last ;;                                       # Enter -> last lane
-    0|*[!0-9]*) model=$pick ;;                                       # not a menu number -> lane name verbatim
-    *)          model=${list[10#$pick-1]-}; model=${model%%$'\t'*} ;; # menu index (1-based, decimal)
+    '')          model=$last ;;                                       # Enter -> last lane
+    *[!0-9]*|0*) model=$pick ;;                                       # not a menu number -> lane name verbatim
+    *)           model=${list[10#$pick-1]-}; model=${model%%$'\t'*} ;; # menu index (1-based, decimal)
 esac
 if [ -z "$model" ]; then
     echo "claude-local: no valid lane picked; the fleet:" >&2
