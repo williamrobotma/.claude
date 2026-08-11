@@ -18,6 +18,7 @@ For the WSL2 session. Context: plugin-disabling was made a claude-local feature,
 - `ANTHROPIC_BASE_URL=http://127.0.0.1:11433`, hardcoded, no `/v1`: claude-local rides `Anthropic /v1/messages` (ollama-modelfiles `docs/architecture.md`); `11433/v1` is the OpenAI-client form.
 - Auth token: `local-router-dummy` (the WSL fn's value; the router checks nothing).
 - Proxy URL/model are not parameters of the synced script: URL is hardcoded, model comes from the menu.
+- claude-local is opt-in per machine: the synced script is inert until a machine adds its own shim (PS profile fn on Windows, bashrc fn in WSL). Nothing puts it on PATH, `provision.sh` is untouched, and most machines will simply never call it; calling it without the router fails in one visible line.
 
 ## WSL next steps
 

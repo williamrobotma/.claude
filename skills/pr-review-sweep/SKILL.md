@@ -9,7 +9,7 @@ Fan out several independent, report-only reviews on a PR, vet what they find, th
 
 ## Core discipline
 
-- Reviews are report-only: no edits, no commits, no PR comments - run each reviewer in an isolated git worktree so it cannot touch the tree.
+- Reviews are report-only: no edits, no commits, no PR comments - run each reviewer in an isolated git worktree so it cannot touch the checkout's git state.
 - Subagent findings are pointers, not truth: re-check every one against the real diff, and get the user's approval before changing anything.
 
 ## Steps
@@ -18,10 +18,14 @@ Fan out several independent, report-only reviews on a PR, vet what they find, th
 2. Pick lenses to fit the diff. Default set: `/review`, `/simplify` (report-only), `security-review`, `auditing-permission-scope`.
 3. Add any lens the diff warrants. No surface? Check it inline and record the null - don't spawn an agent.
 4. Fan out in parallel: one subagent per lens, each in its own worktree, each told "no edits, findings only", each given the same PR context and a fixed return format.
+   - Worktrees branch from `origin/<default-branch>` and lack the head - first step: `git switch --detach <head-sha>`.
+   - Route machine-state checks to reviewers too - worktrees isolate the checkout, not the filesystem.
    - Pick each subagent's model with the CLAUDE.md Delegation tiers: review is judgment, so opus.
+   - Default price, authorized by invoking this skill: one opus reviewer per default lens. Beyond it, gate on a go.
    - Reviewers report every finding with severity + confidence, uncertain/low-severity included; steps 5-6 filter.
    - No self-filter instructions ("only important issues") - they may be obeyed literally and drop real bugs.
 5. Vet every finding against the diff: confirm it cites a real `file:line` and reproduces; drop the hallucinated or out-of-scope ones.
+   - Reproduce on the build the PR targets - a non-repro elsewhere marks the finding unverified, never refuted.
 6. Report once: severity-ranked findings, fixes grouped must-fix / optional / nit, plus what came back clean.
 7. Confirm before touching anything: let the user pick which tiers to apply.
 8. Apply approved fixes to the same PR branch, re-run the repo's lint/link/test gates, then push.
