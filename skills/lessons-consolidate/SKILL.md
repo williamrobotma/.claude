@@ -1,29 +1,20 @@
 ---
 name: lessons-consolidate
-description: Consolidate an accumulated .claude/rules/lessons.md into durable homes (CLAUDE.md rule, path-scoped rule, hook, or deletion) and prune it. Use when lessons.md has grown cluttered, repetitive, or stale.
+description: Fold each lessons.md entry into its durable home - repo AGENTS.md/CLAUDE.md by default - or delete it. Use when lessons.md accumulates.
 ---
 
 # Consolidate lessons
 
-`lessons.md` is an inbox, not an archive. Periodically each entry either
-graduates to a proper home or gets deleted.
+lessons.md is an inbox, not an archive. Every entry ends in exactly one home.
 
-## Steps
-
-1. Read the target `lessons.md` in full; group entries by theme.
-2. Sort every entry into one bucket:
-   - **Graduate - global**: recurred across projects -> propose for
-     `~/.claude/CLAUDE.md` (behavior contract) or `~/.claude/rules/`.
-   - **Graduate - scoped**: only matters for a file type or subtree -> a
-     topic rule with `paths:` frontmatter.
-   - **Graduate - enforce**: "must happen at a fixed point" (before commit,
-     after edit) -> a hook; prose can then be deleted, not duplicated.
-   - **Keep**: still project-specific and still preventing a live mistake.
-   - **Delete**: stale, superseded, N=1 that never recurred, covered by hooks/rules, or native to served models.
-3. Show the proposal as a table (entry -> bucket -> destination) and, for any
-   CLAUDE.md change, the edited section in full-document context. Wait for
-   consent before writing (contract rule 4).
-4. Apply: write destinations first, then rewrite `lessons.md` with only the
-   Keep bucket. Nothing may exist in two places - a graduated lesson is
-   removed from lessons.md in the same pass.
-5. Report counts: graduated / kept / deleted, with file paths touched.
+1. Read the target lessons.md in full.
+2. Bucket each entry:
+   - **Project** (default): -> the repo's AGENTS.md/CLAUDE.md, in the section it belongs to.
+   - **Global**: justified every-project -> `~/.claude/CLAUDE.md` or `~/.claude/rules/`; ambiguous -> ask.
+   - **Scoped**: one file type or subtree -> a rule with `paths:` frontmatter.
+   - **Enforce**: fires at a fixed point (pre-commit, post-edit) -> a hook; the prose is then deleted.
+   - **Keep**: too fresh to place, still preventing a live mistake.
+   - **Delete**: stale, superseded, never recurred, now enforced elsewhere, or native to served models.
+3. Propose scannably - table (entry -> bucket -> destination) + exact new lines at anchors; no rationale prose.
+4. On consent: write destinations, then rewrite lessons.md with only Keep; delete the file if empty.
+5. Report: graduated / kept / deleted, files touched.

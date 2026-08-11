@@ -5,6 +5,11 @@ paths:
 
 # Scope ~/.claude repo-specific instructions properly
 
+## Tier principle (all `.claude` artifacts)
+
+Place every artifact - permission, rule, lesson, skill - at the tier of the resource it acts on, the
+narrowest that fits; ambiguous -> ask.
+
 `~/.claude/CLAUDE.md` is loaded into *every* session, in every project, since
 it doubles as the always-on user-level instructions file. Anything that only
 matters when working on this config repo itself (settings.json internals,

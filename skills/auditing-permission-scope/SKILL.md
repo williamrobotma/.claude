@@ -1,124 +1,90 @@
 ---
 name: auditing-permission-scope
-description: Use when reviewing, tightening, or auditing an AI coding agent's permission settings (e.g. Claude Code settings.json allow/deny/additionalDirectories) - after adding allow rules, before committing a .claude/ config dir, during allowlist cleanup, or when a setup feels over-permissioned.
+description: Audit and tighten an AI coding agent's permission/config scope (settings.json, plugin enablement, .claude tracking). Use after adding allow rules, before committing a .claude/ dir, during allowlist cleanup, or when a setup feels over-permissioned.
 ---
 
-# Auditing Permission Scope
+# Auditing permission scope
 
-## Overview
-Agent permission setups drift broad by default: each friction point earns a
-wildcard, grants pile up at the wrong tier, and the config dir tracks more than
-is safe to share. Audit against **least privilege**: the narrowest rule that
-works, at the narrowest tier, tracking only config safe to commit.
+Audit against least privilege: the narrowest rule that works, at the narrowest tier, tracking only what is
+safe to commit. Tier principle: `~/.claude/rules/repo-scoping.md` - the resource's tier; ambiguous -> ask.
 
-Rules evaluate **deny > ask > allow** (first match wins; specificity is
-ignored). A broad `deny` cannot carry allow-exceptions - narrow the `allow`
-itself instead of trying to carve a hole in a deny. The reverse *does* hold:
-a `deny` overrides a broad `allow`, so you can keep a convenient wildcard and
-deny just its destructive forms - but Bash rules match the command *prefix*, so
-reordered args (`nvidia-smi -i 0 -pl`) slip past a flag-specific deny.
+Eval order: **deny > ask > allow**, first match wins, specificity ignored.
+- A deny cannot carry allow-exceptions - narrow the allow instead.
+- A deny does override a broad allow, but Bash rules match the command *prefix*: reordered args
+  (`nvidia-smi -i 0 -pl`) slip past a flag-specific deny.
 
-Blunt issues (catch-alls, arbitrary exec, secret-printers, redundancy) get
-caught unaided. This skill's value is the easily-missed dimensions: outward-write
-verbs, tier placement, `additionalDirectories` reach, the whitelist gitignore
-remedy, the eval order above, and **context cost** - skills/MCP/connectors that
-load into every session whether or not the project needs them.
+## When
 
-## When to use
-- After adding `allow` rules or `additionalDirectories`.
-- Before committing or sharing a `.claude/settings.json`.
-- "Reduce permission prompts" / allowlist-cleanup requests - audit the *result*,
-  not just append entries (that is `fewer-permission-prompts`, which only broadens).
-- A setup feels over-permissioned, or new MCP servers / workflows were added.
-- Sessions feel context-heavy, or domain plugins/MCP/connectors are enabled
-  globally but only some projects need them.
+- New allow rules, `additionalDirectories`, MCP servers, or workflows; before committing `.claude/`.
+- Allowlist cleanup: audit the result (`fewer-permission-prompts` only appends).
+- A setup feels over-permissioned or sessions feel context-heavy.
+- Skip: one obviously-safe read-only entry.
 
-Skip for a single, obviously-safe, read-only entry.
+## Five lenses
 
-## Five scope lenses
-| Lens | Ask | Flag when |
+| Lens | Ask | Flag |
 |---|---|---|
-| Breadth | Does the wildcard match more than the workflow needs? | arbitrary exec / secret / outward write (below) |
-| Placement | Is this at the narrowest tier that needs it? | machine path in committed file; project grant in global |
-| Redundancy | Already covered by a broader rule? | `conda activate x` under `conda activate *` |
-| Exposure | Would committing this dir leak anything? | denylist gitignore; tracked tokens/transcripts |
-| Context cost | Does this load into every session whether the project needs it? | domain plugin/MCP/connector enabled globally; unused bundled skill |
+| Breadth | Wildcard wider than the workflow? | arbitrary exec / secret / outward write |
+| Placement | Narrowest tier that needs it? | machine path committed; project grant in global |
+| Redundancy | Covered by a broader rule? | `conda activate x` under `conda activate *` |
+| Exposure | Would committing leak? | denylist gitignore; tracked tokens/transcripts |
+| Context cost | Loads every session needlessly? | global domain plugin/MCP; unused skill |
 
-## Over-broad patterns to flag
-**Often missed - focus here:**
-- **Outward / irreversible writes:** `Bash(gh pr *)` (allows create/merge/close),
-  `Bash(git push *)`, deploy commands. Narrow to read verbs (`gh pr view/list/diff`).
-- **`additionalDirectories` reach:** a home/config/credential dir here grants
-  read+write working access across *every* project, not just a one-path read.
+## Patterns
 
-**Usually caught unaided - confirm, don't dwell:** catch-alls (`Bash(*)`, unpathed
-`Write`/`Edit`), arbitrary exec (`Bash(python -)`, `bash -c`, `eval`, `xargs`),
-secret-printers (`Bash(gh auth *)` -> `gh auth status`), rules redundant under a
-broader one.
+Often missed - focus here:
 
-Read-only diagnostics with `*` (`ps *`, `df *`, `git diff *`, `git log *`) are fine.
+- Outward/irreversible writes: `Bash(gh pr *)` (allows create/merge/close), `Bash(git push *)`, deploys ->
+  narrow to read verbs (`gh pr view/list/diff`).
+- `additionalDirectories` = read+write working access; a home/config dir there exposes every project -
+  scope it to the one path needed.
 
-**Tightening a broad allow** - three options, by risk: (1) *narrow the allow* to
-specific safe forms (default-deny, no prefix gap, unlisted forms just prompt) -
-preferred; (2) *keep the wildcard, deny the destructive forms* (default-allow,
-convenient, prefix-gap above); (3) *PreToolUse hook* - only reorder-proof block,
-reserve for genuinely destructive or deny-bypassing commands (e.g. `awk`), overkill
-for style.
+Usually caught unaided - confirm, don't dwell: catch-alls (`Bash(*)`, unpathed Write/Edit), arbitrary exec
+(`python -`, `bash -c`, `eval`, `xargs`), secret-printers (`gh auth *` -> `gh auth status`), redundant rules.
+Read-only diagnostics with `*` (`ps *`, `df *`, `git log *`) are fine.
+
+Tightening a broad allow, by risk: (1) narrow the allow to safe forms (default-deny) - preferred;
+(2) keep the wildcard, deny destructive forms (prefix gap above); (3) PreToolUse hook - the only
+reorder-proof block; reserve for genuinely destructive or deny-bypassing commands (e.g. `awk`).
 
 ## Tier placement
-Two axes: **scope** (this-project vs every-project) and **committed vs local**. The
-committed/local discriminator is *machine-specificity*: an absolute path or
-host-specific value (`/projects/wma/...`, an SSH socket) goes in the gitignored
-`*.local.json`; anything generic and safe goes in the committed file, which travels
-with the repo / syncs across your machines (solo user: "committed" means *portable*,
-not *team-shared*). Place a grant at the tier of the *resource* it acts on, not
-where you happen to be - `git -C ~/.claude status` and global WebFetch domains
-belong in `~/.claude`, not a project file.
 
-| File | Scope | Put here |
-|---|---|---|
-| `.claude/settings.json` | committed, this project | generic, safe, non-machine-specific (e.g. read-only MCP tool allows) |
-| `.claude/settings.local.json` | gitignored, this project | machine paths, host-specific values |
-| `~/.claude/settings.json` | committed, every project | generic global grants; keep narrow + mostly read-only |
-| `~/.claude/settings.local.json` | gitignored, every project | machine-specific global grants (SSH socket, `/proc`) |
+Two axes: this-project vs every-project, committed vs local. Committed/local discriminator:
+machine-specificity - absolute paths and host values go in gitignored `*.local.json`; generic + safe goes
+committed (solo user: committed = portable). Resource-tier examples: `git -C ~/.claude status` and global
+WebFetch domains belong in `~/.claude`, not a project file.
 
-`additionalDirectories` = read+write working access. A home/config dir there at
-global tier exposes every other project's data; scope it to the one path needed.
+| File | Put here |
+|---|---|
+| `.claude/settings.json` | generic, safe, this-project |
+| `.claude/settings.local.json` | machine paths, host values |
+| `~/.claude/settings.json` | narrow generic global grants, mostly read-only |
+| `~/.claude/settings.local.json` | machine-specific global (SSH socket, `/proc`); caveat: `rules/settings-scope.md` |
 
-## Context cost: what loads every session
-MCP *tools* are deferred (loaded on demand) - cheap. The real per-session cost is
-**server-instructions blocks** + **skill-listing lines** (each skill's
-description/when_to_use). Levers that actually shrink it:
-- **Disable the plugin** (`enabledPlugins`) - removes its skills + MCP. Tiered:
-  project overrides user, so *move, don't remove* - keep a domain plugin (bio,
-  infra) in the projects that need it, off globally.
-- **`disable-model-invocation: true`** on your *own* skills - drops the listing
-  from context, keeps `/`-invoke. (Can't edit plugin skills' frontmatter - disable
-  the whole plugin instead.)
-- **Disconnect account connectors** (claude.ai web Connectors) - not in any
-  settings.json; flag as user-action.
+## Context cost
 
-`deny` rules and hooks do **not** shrink context: a denied skill/tool still loads
-its listing/instructions - deny blocks *invocation*, not loading; hooks *add*
-context. Context bloat is a plugin/connector-enablement problem, not a permission one.
+MCP tools are deferred - cheap. The real per-session cost: server-instructions blocks + skill listings. Levers:
 
-## Config-dir gitignore: whitelist, not denylist
-A committed `.claude/` should **whitelist** what is safe, not ignore files
-one-by-one - new agent-dropped files (tokens, transcripts, caches) then default
-to ignored:
+- Disable the plugin at the right tier (project overrides user - move, don't remove).
+- `disable-model-invocation: true` on own skills (keeps `/`-invoke; plugin skills: disable the plugin).
+- Disconnect account connectors (user action, not settings).
+
+Deny rules and hooks do NOT shrink context: deny blocks invocation, not loading; hooks add context.
+
+## Config-dir gitignore
+
+Whitelist, not denylist - agent-dropped files (tokens, transcripts) then default to ignored:
+
 ```gitignore
 .claude/*
 !.claude/settings.json
 ```
-Verify: `git check-ignore .claude/settings.local.json` (ignored) and
-`git add . --dry-run` (only safe files staged).
 
-## Fix workflow
-1. Narrow > remove > move. Prefer replacing a wildcard with specific verbs over
-   deleting it (keeps the workflow smooth).
-2. Apply via `update-config`; keep `defaultMode: default` (every unlisted call
-   still prompts).
-3. Validate JSON after each edit; confirm removed entries gone, narrowed ones present.
-4. State the trade: tightening turns some auto-approvals into prompts - name which.
-5. Context bloat is a separate fix path: disable the plugin/connector (per tier),
-   not a deny rule - see Context cost.
+Verify: `git check-ignore .claude/settings.local.json`; `git add . --dry-run` stages only safe files.
+
+## Fix
+
+1. Narrow > remove > move; apply via `update-config`; keep `defaultMode: default` (every unlisted call still prompts).
+2. Validate JSON; confirm removals gone, narrowed rules present.
+3. State the trade: which auto-approvals become prompts.
+4. Context bloat is a plugin/connector fix, not a deny rule.
