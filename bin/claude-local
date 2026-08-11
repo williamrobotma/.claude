@@ -1,71 +1,78 @@
 #!/usr/bin/env bash
-# claude-local: route Claude Code to the llama-server router (11433, /v1/messages) via a lane menu,
-# with every plugin disabled for the session. Synced to all machines; canonical spec lives in
+# claude-local: Claude Code on the local llama-server router - one lane per session, plugins off.
+# Synced to all machines; a per-machine shim invokes it. Canonical spec:
 # williamrobotma/ollama-modelfiles AGENTS.md#claude-local (feat/llamacpp-migration).
-#
-# Lane = the fleet model serving ALL session roles: ANTHROPIC_MODEL + tier + subagent vars (B6 fix).
-# No flag and no hardcoded default: a numbered menu picks the lane; Enter re-picks the last one
-# (~/.config/claude-local.last). All claude args, --model included, pass through untouched;
-# mid-session /model moves only the main session.
-# Anything that is not a menu number is taken as a lane name verbatim - the escape hatch; the router
-# 404s on a typo.
-# Menu = the router's live /v1/models ids plus each entry's aliases (aliases resolve in request bodies
-# but are never listed as ids - server-models.cpp get_router_models), sorted (C collation), with each
-# lane's status (loaded / sleeping / unloaded) so a resident lane can be picked without waking the GPU.
-# Listing is read-only - nothing here instantiates a model.
-set -uo pipefail
+set -u
 
 router=http://127.0.0.1:11433
 last_file=$HOME/.config/claude-local.last
-last=$(cat "$last_file" 2>/dev/null || true)
+last=$(cat "$last_file" 2>/dev/null)
+
+# --settings is a per-session CLI override (beats settings.json); built before the menu so a broken
+# settings.json fails before a lane gets picked.
+no_plugins="$(python3 - <<'EOF'
+import json
+import os
+
+path = os.path.expanduser("~/.claude/settings.json")
+with open(path, encoding="utf-8") as f:
+    plugins = json.load(f).get("enabledPlugins", {})
+print(json.dumps({"enabledPlugins": {name: False for name in plugins}}))
+EOF
+)" || { echo "claude-local: could not build the plugin-disable override from ~/.claude/settings.json" >&2; exit 1; }
 
 body=$(curl -fsS -m 5 "$router/v1/models") \
     || { echo "claude-local: no model list from $router/v1/models - is the router up?" >&2; exit 1; }
-lanes=$(CL_BODY=$body python3 - <<'EOF'
+# Tab carrier: name<TAB>display. Ids are models.ini section names, so they are tab-free.
+raw=$(CL_BODY=$body python3 - <<'EOF'
 import json
 import os
-import sys
 
 for m in json.loads(os.environ["CL_BODY"])["data"]:
-    status = m.get("status", "?")  # an object on this router: {value, args, ...}
-    if isinstance(status, dict):
-        status = status.get("value", "?")
-    for name in [m["id"], *m.get("aliases", [])]:
-        # A control char in an id could forge menu rows or ANSI-redraw the TTY; skip it visibly.
-        if any(ord(c) < 0x20 or ord(c) == 0x7f for c in name):
-            print("claude-local: skipping unprintable id %r" % name, file=sys.stderr)
-            continue
-        print(name + "\t" + (str(status) if name == m["id"] else "alias -> " + m["id"]))
+    status = m["status"]["value"]
+    print(m["id"] + "\t" + status)
+    for alias in m["aliases"]:
+        print(alias + "\t" + status + "  (alias -> " + m["id"] + ")")
 EOF
 ) || { echo "claude-local: could not parse the $router/v1/models response" >&2; exit 1; }
-list=()
-while IFS=$'\t' read -r id status; do list+=("$id"$'\t'"$status"); done < <(LC_ALL=C sort <<<"$lanes")
-[ ${#list[@]} -gt 0 ] || { echo "claude-local: $router/v1/models returned an empty fleet" >&2; exit 1; }
+[ -n "$raw" ] || { echo "claude-local: $router/v1/models returned an empty fleet" >&2; exit 1; }
+mapfile -t lanes < <(LC_ALL=C sort <<<"$raw")
 
 pick=
 if [ -t 0 ]; then
     i=0
-    for entry in "${list[@]}"; do
+    for entry in "${lanes[@]}"; do
         i=$((i+1))
-        id=${entry%%$'\t'*}; status=${entry#*$'\t'}
+        id=${entry%%$'\t'*}; display=${entry#*$'\t'}
         mark=''; [ "$id" = "$last" ] && mark='  <- last'
-        printf '%3d) %-40s %s%s\n' "$i" "$id" "$status" "$mark" >&2
+        printf '%3d) %-40s %s%s\n' "$i" "$id" "$display" "$mark" >&2
     done
-    read -r -p "lane [${last:-none}]: " pick || { echo >&2; exit 1; }
+    read -r -p "lane [${last:-none}]: " pick || { echo "claude-local: aborted" >&2; exit 1; }
 elif [ -n "$last" ]; then
     echo "claude-local: non-interactive, reusing lane $last" >&2
+else
+    echo "claude-local: non-interactive and no saved lane; the fleet:" >&2
+    printf '  %s\n' "${lanes[@]%%$'\t'*}" >&2
+    exit 1
 fi
+# A menu pick is digits only. Everything else is a lane name verbatim (escape hatch; the router 404s
+# on a typo) - including 0*: bash's ${lanes[-1]} would make a bare 0 silently pick the last lane.
 case $pick in
-    '')          model=$last ;;                                       # Enter -> last lane
-    *[!0-9]*|0*) model=$pick ;;                                       # not a menu number -> lane name verbatim
-    *)           model=${list[10#$pick-1]-}; model=${model%%$'\t'*} ;; # menu index (1-based, decimal)
+    '')          model=$last ;;
+    *[!0-9]*|0*) model=$pick ;;
+    *)           model=${lanes[$pick-1]-}; model=${model%%$'\t'*} ;;
 esac
 if [ -z "$model" ]; then
     echo "claude-local: no valid lane picked; the fleet:" >&2
-    printf '  %s\n' "${list[@]%%$'\t'*}" >&2
+    printf '  %s\n' "${lanes[@]%%$'\t'*}" >&2
     exit 1
 fi
-case " ${list[*]%%$'\t'*} " in *" $model "*) mkdir -p "$HOME/.config"; printf '%s\n' "$model" > "$last_file" ;; esac
+# Off-fleet picks (typos) are not persisted.
+case " ${lanes[*]%%$'\t'*} " in
+    *" $model "*)
+        mkdir -p "$HOME/.config"
+        printf '%s\n' "$model" > "$last_file" ;;
+esac
 
 export ANTHROPIC_BASE_URL=$router
 export ANTHROPIC_AUTH_TOKEN=local-router-dummy
@@ -76,34 +83,14 @@ export ANTHROPIC_DEFAULT_SONNET_MODEL=$model
 export ANTHROPIC_DEFAULT_OPUS_MODEL=$model
 export CLAUDE_CODE_SUBAGENT_MODEL=$model
 
-# Plugins off for the session: --settings is a per-session CLI-arg override (beats settings.json).
-# It enumerates every enabledPlugins key as false - built at launch, so never stale; settings.json untouched.
-no_plugins="$(python3 - <<'EOF'
-import json
-import os
-
-path = os.path.expanduser("~/.claude/settings.json")
-with open(path, encoding="utf-8") as f:
-    plugins = json.load(f).get("enabledPlugins", {})
-print(json.dumps({"enabledPlugins": {name: False for name in plugins}}))
-EOF
-)"
-# Fail closed: an unreadable/malformed settings.json would otherwise yield --settings= (silently accepted,
-# all plugins on) - the opposite of this script's contract.
-[ -n "$no_plugins" ] || { echo "claude-local: could not build the plugin-disable override from ~/.claude/settings.json" >&2; exit 1; }
-
-# Web-search MCP: WSL-only wiring (vendored in ollama-modelfiles, run via pipx); gated on its
-# config existing. Its secrets file is then required, as in the original ~/.bashrc fn.
+# Web-search MCP wiring, gated on its config existing (present on WSL only).
 # =VALUE form is required on the variadic flags: the space form eats "$@".
 mcp_config=$HOME/.config/claude-local.mcp.json
 if [ -f "$mcp_config" ]; then
-    if [ ! -r "$HOME/.config/claude-local.env" ]; then
-        echo "claude-local: ~/.config/claude-local.env not found (required with $mcp_config)" >&2
-        exit 1
-    fi
     set -a
     # shellcheck source=/dev/null
-    source "$HOME/.config/claude-local.env"
+    source "$HOME/.config/claude-local.env" \
+        || { echo "claude-local: failed to load ~/.config/claude-local.env (required with $mcp_config)" >&2; exit 1; }
     set +a
     exec claude --settings="$no_plugins" --disallowedTools=WebSearch --mcp-config="$mcp_config" "$@"
 fi
