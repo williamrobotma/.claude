@@ -188,7 +188,7 @@
       "/tmp"
     ]
   },
-  "model": "sonnet",
+  "model": "fable",
   "hooks": {
     "PreToolUse": [
       {
