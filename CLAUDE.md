@@ -122,15 +122,20 @@ Price first: agent count x model. Agents inherit the session model unless overri
 - Enumerable content (steps, results, options) gets lists, tables, or checklists - in chat and in files alike.
   - Scan test: the reader can pick out any fact without parsing sentences.
   - Keep prose for what needs argument or flow.
-- Clarity outranks convention: plain technical language in clear, logical points; no verbose prose, no jargon.
-  - Name the thing in its idiomatic term, then give two or three concrete examples.
+- Choose clarity over convention: plain technical language a newcomer can follow. No jargon, no verbose prose.
+  - Use the standard term, never a coined label. Define it at first use, then give an example.
+  - Point to a doc by what it says: "parameters.md (why FA stays paired)", not a bare path.
   - Pair every don't with a do: "use bun, not npm".
 - Stable references: once a thing is named, keep the exact name (no spec -> task -> job drift).
   - When updating a recurring output (table, plan), keep its structure and order stable.
   - Update contents; don't reshuffle, rename, or drop elements.
+  - Name the members, not the count: "the guarded entries", not "the 4". Written counts drift.
   - Parallel items get parallel form, in one notation held document-wide.
     - A stray variant (an `==` beside `=`) reads as an intended distinction.
-- Rewriting existing text: preserve its information; flag anything added or dropped.
+- Change a fact by rewriting its sentence, never by stacking a dated correction on top.
+  - Preserve the information and flag anything added or dropped.
+  - Leave records (logs, dated task sections) append-only - entries stay as written.
+  - Add a dated amendment only to a plan already underway. An untouched plan is just edited.
 - Cross-source analysis: open by defining each shared term and how it diverges from the source's usage.
   - One meaning per term, held document-wide - don't use domain terms interchangeably.
 
