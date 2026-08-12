@@ -111,9 +111,10 @@ Price first: agent count x model. Agents inherit the session model unless overri
 
 - Basic keyboard symbols only in chat, code, commits, and .md prose (hooks cover .md only).
   - `->` not the arrow glyph, `x` not the multiply sign, `-`/`:`/` - ` over em-dash and middot.
-- Markdown is not Python: never hard-wrap it (one idea per bullet, soft-wrap, nest).
+- Markdown is not Python: never hard-wrap it - one idea per line, in paragraphs as in bullets.
   - Fix a >120 line by cutting or splitting ideas, never by a mid-idea line break.
     - Nothing enforces this: rumdl flags the length, not the break.
+- Code comments invert that: hard-wrap at 80, terse - state the rule and point to the owning doc, don't explain in place.
 - Concise = dense per word: cut redundancy, then split multi-idea lines into sub-bullets. Never split one idea.
   - Cut content, don't compress syntax: full sentences over colon-and-semicolon splices.
 - Size written deliverables to the task: cover the substance and skip filler, redundant summaries, and boilerplate.
